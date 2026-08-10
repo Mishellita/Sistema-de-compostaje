@@ -171,4 +171,4 @@ elif menu == "Nueva Formulación":
                     f"{relacion_cn:.2f}"
                 )
 
-            st.
+st.
