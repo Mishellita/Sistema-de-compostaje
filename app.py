@@ -170,5 +170,3 @@ elif menu == "Nueva Formulación":
                     "Relación C/N",
                     f"{relacion_cn:.2f}"
                 )
-
-st.
