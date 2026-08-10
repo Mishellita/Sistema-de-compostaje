@@ -20,7 +20,7 @@ menu = st.sidebar.radio(
     ]
 )
 
-# DATOS DE INSUMOS
+# Datos de insumos
 insumos = {
     "RO": {"humedad": 80, "c": 48, "n": 3.2},
     "ROD": {"humedad": 15, "c": 48.3, "n": 3.26},
@@ -40,43 +40,9 @@ elif menu == "Nueva Formulación":
 
     fecha = st.date_input("Fecha")
 
-    operador = st.text_input("Operador")
-
-    lote = st.text_input("Código de lote")
-
-    ro = st.number_input(
-        "Residuos Orgánicos (ton)",
-        min_value=0.0,
-        value=0.0
+    operador = st.text_input(
+        "Operador",
+        value="Mishel Ruiz"
     )
 
-    rod = st.number_input(
-        "Residuos Orgánicos Deshidratados (ton)",
-        min_value=0.0,
-        value=0.0
-    )
-
-    ld = st.number_input(
-        "Lodo Deshidratado (ton)",
-        min_value=0.0,
-        value=0.0
-    )
-
-    ca = st.number_input(
-        "Cartón (ton)",
-        min_value=0.0,
-        value=0.0
-    )
-
-    comentarios = st.text_area("Comentarios")
-
-    if st.button("Calcular Formulación"):
-
-        masas = {
-            "RO": ro,
-            "ROD": rod,
-            "LD": ld,
-            "CA": ca
-        }
-
-      masa_total = sum(masas.values())
+   
