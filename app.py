@@ -170,3 +170,36 @@ elif menu == "Nueva Formulación":
                     "Relación C/N",
                     f"{relacion_cn:.2f}"
                 )
+            st.subheader("Evaluación")
+
+            st.write(
+                f"Estado Humedad: {estado_humedad}"
+            )
+
+            st.write(
+                f"Estado Relación C/N: {estado_cn}"
+            )
+
+            st.write(
+                f"Estado Formulación: {estado_formulacion}"
+            )
+
+            if estado_humedad == "BAJA":
+                st.warning(
+                    "Incrementar humedad antes de conformar la pila."
+                )
+
+            if estado_humedad == "ALTA":
+                st.warning(
+                    "Agregar material estructurante seco."
+                )
+
+            if estado_cn == "BAJO":
+                st.warning(
+                    "Agregar materiales ricos en carbono."
+                )
+
+            if estado_cn == "ALTO":
+                st.warning(
+                    "Agregar materiales ricos en nitrógeno."
+                )
