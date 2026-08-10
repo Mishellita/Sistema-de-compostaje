@@ -20,9 +20,19 @@ menu = st.sidebar.radio(
     ]
 )
 
+# DATOS DE INSUMOS
+insumos = {
+    "RO": {"humedad": 80, "c": 48, "n": 3.2},
+    "ROD": {"humedad": 15, "c": 48.3, "n": 3.26},
+    "LD": {"humedad": 40, "c": 32, "n": 3.5},
+    "CA": {"humedad": 0, "c": 45, "n": 0.11},
+}
+
 if menu == "Inicio":
 
-    st.info("Bienvenido al Sistema")
+    st.info(
+        "Bienvenido al Sistema de Apoyo para Formulación de Compostaje"
+    )
 
 elif menu == "Nueva Formulación":
 
@@ -36,45 +46,37 @@ elif menu == "Nueva Formulación":
 
     ro = st.number_input(
         "Residuos Orgánicos (ton)",
-        min_value=0.0
+        min_value=0.0,
+        value=0.0
     )
 
     rod = st.number_input(
         "Residuos Orgánicos Deshidratados (ton)",
-        min_value=0.0
+        min_value=0.0,
+        value=0.0
     )
 
     ld = st.number_input(
         "Lodo Deshidratado (ton)",
-        min_value=0.0
+        min_value=0.0,
+        value=0.0
     )
 
-    carton = st.number_input(
+    ca = st.number_input(
         "Cartón (ton)",
-        min_value=0.0
+        min_value=0.0,
+        value=0.0
     )
 
     comentarios = st.text_area("Comentarios")
 
-    if st.button("Guardar Formulación"):
+    if st.button("Calcular Formulación"):
 
-        total = ro + rod + ld + carton
+        masas = {
+            "RO": ro,
+            "ROD": rod,
+            "LD": ld,
+            "CA": ca
+        }
 
-        st.success("Formulación registrada")
-
-        st.metric(
-            "Masa Total",
-            f"{round(total,2)} ton"
-        )
-
-elif menu == "Seguimiento":
-
-    st.header("Seguimiento de Lotes")
-
-elif menu == "Inventario":
-
-    st.header("Inventario")
-
-elif menu == "Indicadores":
-
-    st.header("Indicadores")
+        masa_total = sum(masas.
