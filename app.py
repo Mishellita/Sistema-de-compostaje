@@ -79,4 +79,4 @@ elif menu == "Nueva Formulación":
             "CA": ca
         }
 
-        masa_total = sum(masas.
+      masa_total = sum(masas.values())
