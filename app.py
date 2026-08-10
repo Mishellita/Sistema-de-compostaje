@@ -45,4 +45,130 @@ elif menu == "Nueva Formulación":
         value="Mishel Ruiz"
     )
 
-   
+    lote = st.text_input(
+        "Código de lote",
+        value="CMP-001-2026"
+    )
+
+    ro = st.number_input(
+        "Residuos Orgánicos (ton)",
+        min_value=0.0,
+        value=0.0
+    )
+
+    rod = st.number_input(
+        "Residuos Orgánicos Deshidratados (ton)",
+        min_value=0.0,
+        value=0.0
+    )
+
+    ld = st.number_input(
+        "Lodo Deshidratado (ton)",
+        min_value=0.0,
+        value=0.0
+    )
+
+    ca = st.number_input(
+        "Cartón (ton)",
+        min_value=0.0,
+        value=0.0
+    )
+
+    comentarios = st.text_area("Comentarios")
+
+    if st.button("Calcular Formulación"):
+
+        masas = {
+            "RO": ro,
+            "ROD": rod,
+            "LD": ld,
+            "CA": ca
+        }
+
+        masa_total = sum(masas.values())
+
+        agua_total = 0
+        masa_seca_total = 0
+        carbono_total = 0
+        nitrogeno_total = 0
+
+        for material, masa in masas.items():
+
+            humedad = insumos[material]["humedad"]
+
+            masa_seca = masa * (1 - humedad / 100)
+
+            agua = masa - masa_seca
+
+            carbono = masa_seca * insumos[material]["c"] / 100
+
+            nitrogeno = masa_seca * insumos[material]["n"] / 100
+
+            agua_total += agua
+            masa_seca_total += masa_seca
+            carbono_total += carbono
+            nitrogeno_total += nitrogeno
+
+        if masa_total > 0:
+
+            humedad_mezcla = (
+                agua_total / masa_total
+            ) * 100
+
+            carbono_pct = (
+                carbono_total / masa_seca_total
+            ) * 100
+
+            nitrogeno_pct = (
+                nitrogeno_total / masa_seca_total
+            ) * 100
+
+            relacion_cn = (
+                carbono_pct / nitrogeno_pct
+            )
+
+            if humedad_mezcla < 50:
+                estado_humedad = "BAJA"
+            elif humedad_mezcla > 60:
+                estado_humedad = "ALTA"
+            else:
+                estado_humedad = "CORRECTA"
+
+            if relacion_cn < 25:
+                estado_cn = "BAJO"
+            elif relacion_cn > 35:
+                estado_cn = "ALTO"
+            else:
+                estado_cn = "CORRECTO"
+
+            if (
+                estado_humedad == "CORRECTA"
+                and estado_cn == "CORRECTO"
+            ):
+                estado_formulacion = "APROBADA"
+            else:
+                estado_formulacion = "REFORMULAR"
+
+            st.success("Cálculo realizado correctamente")
+
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                st.metric(
+                    "Masa Total",
+                    f"{masa_total:.2f} ton"
+                )
+
+            with col2:
+                st.metric(
+                    "Humedad Inicial",
+                    f"{humedad_mezcla:.2f}%"
+                )
+
+            with col3:
+                st.metric(
+                    "Relación C/N",
+                    f"{relacion_cn:.2f}"
+                )
+
+            st.
