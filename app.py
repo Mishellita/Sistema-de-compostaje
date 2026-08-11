@@ -324,7 +324,7 @@ elif menu == "Capacidad de lodo":
             )
     
     with col3:
-        st.metric(
-            "Lodo recomendado final",
-            f"{lodo_recomendado:.2f} ton"
-        )
+            st.metric(
+                "Lodo recomendado final",
+                f"{lodo_recomendado:.2f} ton"
+            )
