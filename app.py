@@ -204,3 +204,32 @@ elif menu == "Nueva Formulación":
                 st.warning(
                     "Agregar materiales ricos en nitrógeno."
                 )
+elif menu == "Capacidad de lodo":
+
+    st.header("Capacidad de lodo")
+
+    st.write(
+        "Estima la cantidad máxima de lodo que puede incorporarse "
+        "según los criterios de relación C/N y humedad de la formulación inicial."
+    )
+
+    ro_cap = st.number_input(
+        "Residuos Orgánicos disponibles (ton)",
+        min_value=0.0,
+        value=0.0,
+        key="ro_cap"
+    )
+
+    rod_cap = st.number_input(
+        "Residuos Orgánicos Deshidratados disponibles (ton)",
+        min_value=0.0,
+        value=0.0,
+        key="rod_cap"
+    )
+
+    ca_cap = st.number_input(
+        "Cartón / Material estructurante disponible (ton)",
+        min_value=0.0,
+        value=0.0,
+        key="ca_cap"
+    )
