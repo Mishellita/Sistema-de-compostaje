@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
-df_insumos = 
-pd.read_csv("insumos.csv")
+df_insumos = pd.read_csv("insumos.csv")
 insumos = {
     fila["codigo"]: {
         "humedad": fila["humedad"],
