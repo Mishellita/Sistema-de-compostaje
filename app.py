@@ -210,25 +210,6 @@ elif menu == "Nueva Formulación":
                     f"Recomendación C/N: "
                     f"{fila_cn.iloc[0]['recomendacion']}"
                 )
-            if estado_humedad == "BAJA":
-                st.warning(
-                    "Incrementar humedad antes de conformar la pila."
-                )
-
-            if estado_humedad == "ALTA":
-                st.warning(
-                    "Agregar material estructurante seco."
-                )
-
-            if estado_cn == "BAJO":
-                st.warning(
-                    "Agregar materiales ricos en carbono."
-                )
-
-            if estado_cn == "ALTO":
-                st.warning(
-                    "Agregar materiales ricos en nitrógeno."
-                )
                 
 elif menu == "Capacidad de lodo":
 
