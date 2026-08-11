@@ -234,70 +234,70 @@ elif menu == "Capacidad de lodo":
         value=0.0,
         key="ca_cap"
     )
-cn_min = 25
-cn_max = 35
-hum_min = 50
-hum_max = 60
-
-carbono_sin_lodo = (
-    ro_cap * (1 - insumos["RO"]["humedad"] / 100) * insumos["RO"]["c"] / 100
-    + rod_cap * (1 - insumos["ROD"]["humedad"] / 100) * insumos["ROD"]["c"] / 100
-    + ca_cap * (1 - insumos["CA"]["humedad"] / 100) * insumos["CA"]["c"] / 100
-)
-
-nitrogeno_sin_lodo = (
-    ro_cap * (1 - insumos["RO"]["humedad"] / 100) * insumos["RO"]["n"] / 100
-    + rod_cap * (1 - insumos["ROD"]["humedad"] / 100) * insumos["ROD"]["n"] / 100
-    + ca_cap * (1 - insumos["CA"]["humedad"] / 100) * insumos["CA"]["n"] / 100
-)
-carbono_por_ton_lodo = (
-    (1 - insumos["LD"]["humedad"] / 100)
-    * insumos["LD"]["c"] / 100
-)
-
-nitrogeno_por_ton_lodo = (
-    (1 - insumos["LD"]["humedad"] / 100)
-    * insumos["LD"]["n"] / 100
-)
-denominador_cn = (
-    cn_min * nitrogeno_por_ton_lodo
-    - carbono_por_ton_lodo
-)
-
-if denominador_cn != 0:
-    lodo_por_cn = (
-        carbono_sin_lodo
-        - cn_min * nitrogeno_sin_lodo
-    ) / denominador_cn
-else:
-    lodo_por_cn = 0
-
-lodo_por_cn = max(0, lodo_por_cn)
-st.write("Lodo máximo por C/N:", round(lodo_por_cn, 4), "ton")
-agua_sin_lodo = (
-    ro_cap * insumos["RO"]["humedad"] / 100
-    + rod_cap * insumos["ROD"]["humedad"] / 100
-    + ca_cap * insumos["CA"]["humedad"] / 100
-)
-
-masa_sin_lodo = ro_cap + rod_cap + ca_cap
-
-humedad_lodo = insumos["LD"]["humedad"] / 100
-humedad_max = hum_max / 100
-
-if humedad_lodo <= humedad_max:
-    lodo_por_humedad = None
-else:
-    lodo_por_humedad = (
-        humedad_max * masa_sin_lodo - agua_sin_lodo
-    ) / (
-        humedad_lodo - humedad_max
+    cn_min = 25
+    cn_max = 35
+    hum_min = 50
+    hum_max = 60
+    
+    carbono_sin_lodo = (
+        ro_cap * (1 - insumos["RO"]["humedad"] / 100) * insumos["RO"]["c"] / 100
+        + rod_cap * (1 - insumos["ROD"]["humedad"] / 100) * insumos["ROD"]["c"] / 100
+        + ca_cap * (1 - insumos["CA"]["humedad"] / 100) * insumos["CA"]["c"] / 100
     )
-if lodo_por_humedad is None:
-    st.write("Límite por humedad: NO LIMITA")
-else:
-    st.write(
-        "Lodo máximo por humedad:",
-        round(lodo_por_humedad, 4),
-        "ton"
+    
+    nitrogeno_sin_lodo = (
+        ro_cap * (1 - insumos["RO"]["humedad"] / 100) * insumos["RO"]["n"] / 100
+        + rod_cap * (1 - insumos["ROD"]["humedad"] / 100) * insumos["ROD"]["n"] / 100
+        + ca_cap * (1 - insumos["CA"]["humedad"] / 100) * insumos["CA"]["n"] / 100
+    )
+    carbono_por_ton_lodo = (
+        (1 - insumos["LD"]["humedad"] / 100)
+        * insumos["LD"]["c"] / 100
+    )
+    
+    nitrogeno_por_ton_lodo = (
+        (1 - insumos["LD"]["humedad"] / 100)
+        * insumos["LD"]["n"] / 100
+    )
+    denominador_cn = (
+        cn_min * nitrogeno_por_ton_lodo
+        - carbono_por_ton_lodo
+    )
+    
+    if denominador_cn != 0:
+        lodo_por_cn = (
+            carbono_sin_lodo
+            - cn_min * nitrogeno_sin_lodo
+        ) / denominador_cn
+    else:
+        lodo_por_cn = 0
+    
+    lodo_por_cn = max(0, lodo_por_cn)
+    st.write("Lodo máximo por C/N:", round(lodo_por_cn, 4), "ton")
+    agua_sin_lodo = (
+        ro_cap * insumos["RO"]["humedad"] / 100
+        + rod_cap * insumos["ROD"]["humedad"] / 100
+        + ca_cap * insumos["CA"]["humedad"] / 100
+    )
+    
+    masa_sin_lodo = ro_cap + rod_cap + ca_cap
+    
+    humedad_lodo = insumos["LD"]["humedad"] / 100
+    humedad_max = hum_max / 100
+    
+    if humedad_lodo <= humedad_max:
+        lodo_por_humedad = None
+    else:
+        lodo_por_humedad = (
+            humedad_max * masa_sin_lodo - agua_sin_lodo
+        ) / (
+            humedad_lodo - humedad_max
+        )
+    if lodo_por_humedad is None:
+        st.write("Límite por humedad: NO LIMITA")
+    else:
+        st.write(
+            "Lodo máximo por humedad:",
+            round(lodo_por_humedad, 4),
+            "ton"
     )
