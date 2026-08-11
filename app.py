@@ -118,18 +118,22 @@ elif menu == "Nueva Formulación":
             humedad_mezcla = (
                 agua_total / masa_total
             ) * 100
-
+        if masa_seca_total > 0:
             carbono_pct = (
                 carbono_total / masa_seca_total
             ) * 100
-
+        
             nitrogeno_pct = (
                 nitrogeno_total / masa_seca_total
             ) * 100
-
-            relacion_cn = (
-                carbono_pct / nitrogeno_pct
-            )
+        else:
+            carbono_pct = 0
+            nitrogeno_pct = 0
+        
+        if nitrogeno_total > 0:
+            relacion_cn = carbono_total / nitrogeno_total
+        else:
+            relacion_cn = 0
             
             fila_mesofila = df_parametros[
                 df_parametros["fase"] == "Mesofila I"
