@@ -337,3 +337,31 @@ elif menu == "Capacidad de lodo":
             "Lodo recomendado final",
             f"{lodo_recomendado:.2f} ton"
         )
+    masa_total_formulacion = masa_sin_lodo + lodo_recomendado
+    
+    agua_total_formulacion = (
+        agua_sin_lodo
+        + lodo_recomendado * humedad_lodo
+    )
+    
+    if masa_total_formulacion > 0:
+        humedad_resultante = (
+            agua_total_formulacion / masa_total_formulacion
+        ) * 100
+    else:
+        humedad_resultante = 0
+    
+    carbono_final = (
+        carbono_sin_lodo
+        + lodo_recomendado * carbono_por_ton_lodo
+    )
+    
+    nitrogeno_final = (
+        nitrogeno_sin_lodo
+        + lodo_recomendado * nitrogeno_por_ton_lodo
+    )
+    
+    if nitrogeno_final > 0:
+        cn_resultante = carbono_final / nitrogeno_final
+    else:
+        cn_resultante = 0
