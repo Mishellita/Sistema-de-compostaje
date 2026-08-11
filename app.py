@@ -315,9 +315,11 @@ elif menu == "Capacidad de lodo":
     else:
         lodo_recomendado = min(lodo_por_cn, lodo_por_humedad)
         st.subheader("Resultado del simulador")
-
+    
+    col1 = st.columns(1)
+    
     with col1:
         st.metric(
             "Lodo recomendado final",
             f"{lodo_recomendado:.2f} ton"
-        )
+    )
