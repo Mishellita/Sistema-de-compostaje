@@ -233,3 +233,7 @@ elif menu == "Capacidad de lodo":
         value=0.0,
         key="ca_cap"
     )
+cn_min = 25
+cn_max = 35
+hum_min = 50
+hum_max = 60
