@@ -237,3 +237,24 @@ cn_min = 25
 cn_max = 35
 hum_min = 50
 hum_max = 60
+
+carbono_sin_lodo = (
+    ro_cap * (1 - insumos["RO"]["humedad"] / 100) * insumos["RO"]["c"] / 100
+    + rod_cap * (1 - insumos["ROD"]["humedad"] / 100) * insumos["ROD"]["c"] / 100
+    + ca_cap * (1 - insumos["CA"]["humedad"] / 100) * insumos["CA"]["c"] / 100
+)
+
+nitrogeno_sin_lodo = (
+    ro_cap * (1 - insumos["RO"]["humedad"] / 100) * insumos["RO"]["n"] / 100
+    + rod_cap * (1 - insumos["ROD"]["humedad"] / 100) * insumos["ROD"]["n"] / 100
+    + ca_cap * (1 - insumos["CA"]["humedad"] / 100) * insumos["CA"]["n"] / 100
+)
+carbono_por_ton_lodo = (
+    (1 - insumos["LD"]["humedad"] / 100)
+    * insumos["LD"]["c"] / 100
+)
+
+nitrogeno_por_ton_lodo = (
+    (1 - insumos["LD"]["humedad"] / 100)
+    * insumos["LD"]["n"] / 100
+)
