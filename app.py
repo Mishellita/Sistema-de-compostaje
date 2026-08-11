@@ -1,5 +1,15 @@
 import streamlit as st
 import pandas as pd
+df_insumos = 
+pd.read_csv("insumos.csv")
+insumos = {
+    fila["codigo"]: {
+        "humedad": fila["humedad"],
+        "c": fila["carbono"],
+        "n": fila["nitrogeno"]
+    }
+    for _, fila in df_insumos.iterrows()
+}
 st.set_page_config(
     page_title="SAFCO",
     page_icon="🌱",
@@ -20,14 +30,6 @@ menu = st.sidebar.radio(
         "Indicadores"
     ]
 )
-
-# Datos de insumos
-insumos = {
-    "RO": {"humedad": 80, "c": 48, "n": 3.2},
-    "ROD": {"humedad": 15, "c": 48.3, "n": 3.26},
-    "LD": {"humedad": 40, "c": 32, "n": 3.5},
-    "CA": {"humedad": 0, "c": 45, "n": 0.11},
-}
 
 if menu == "Inicio":
 
