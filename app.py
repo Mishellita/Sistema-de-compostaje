@@ -273,3 +273,32 @@ else:
 
 lodo_por_cn = max(0, lodo_por_cn)
 st.write("Lodo máximo por C/N:", round(lodo_por_cn, 4), "ton")
+agua_sin_lodo = (
+    ro_cap * insumos["RO"]["humedad"] / 100
+    + rod_cap * insumos["ROD"]["humedad"] / 100
+    + ca_cap * insumos["CA"]["humedad"] / 100
+)
+
+masa_sin_lodo = ro_cap + rod_cap + ca_cap
+
+humedad_lodo = insumos["LD"]["humedad"] / 100
+humedad_max = hum_max / 100
+
+if humedad_lodo <= humedad_max:
+    lodo_por_humedad = None
+else:
+    lodo_por_humedad = (
+        humedad_max * masa_sin_lodo - agua_sin_lodo
+    ) / (
+        humedad_lodo - humedad_max
+    )
+
+    lodo_por_humedad = max(0, lodo_por_humedad)
+    if lodo_por_humedad is None:
+    st.write("Límite por humedad: NO LIMITA")
+else:
+    st.write(
+        "Lodo máximo por humedad:",
+        round(lodo_por_humedad, 4),
+        "ton"
+    )
