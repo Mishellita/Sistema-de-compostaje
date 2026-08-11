@@ -293,4 +293,11 @@ elif menu == "Capacidad de lodo":
         ) / (
             humedad_lodo - humedad_max
         )
-         lodo_por_humedad = max(0, lodo_por_humedad)
+    if lodo_por_humedad is None:
+        st.write("Límite por humedad: NO LIMITA")
+    else:
+        st.write(
+            "Lodo máximo por humedad:",
+            round(lodo_por_humedad, 4),
+            "ton"
+        )
