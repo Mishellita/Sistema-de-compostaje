@@ -392,14 +392,17 @@ elif menu == "Capacidad de lodo":
             "Relación C/N resultante",
             f"{cn_resultante:.2f}"
         )
+    cn_evaluado = round(cn_resultante, 2)
+    humedad_evaluada = round(humedad_resultante, 2)
+    
     if (
-        cn_resultante < cn_min
-        or cn_resultante > cn_max
-        or humedad_resultante > hum_max
+        cn_evaluado < cn_min
+        or cn_evaluado > cn_max
+        or humedad_evaluada > hum_max
     ):
         estado_simulador = "NO ADMISIBLE"
     
-    elif humedad_resultante < hum_min:
+    elif humedad_evaluada < hum_min:
         estado_simulador = "ADMISIBLE CON AJUSTE DE HUMEDAD"
     
     else:
