@@ -310,3 +310,30 @@ elif menu == "Capacidad de lodo":
             round(lodo_recomendado, 4),
             "ton"
         )
+    st.subheader("Resultado del simulador")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric(
+            "Lodo máximo por C/N",
+            f"{lodo_por_cn:.2f} ton"
+        )
+    
+    with col2:
+        if lodo_por_humedad is None:
+            st.metric(
+                "Límite por humedad",
+                "NO LIMITA"
+            )
+        else:
+            st.metric(
+                "Lodo máximo por humedad",
+                f"{lodo_por_humedad:.2f} ton"
+            )
+    
+    with col3:
+        st.metric(
+            "Lodo recomendado final",
+            f"{lodo_recomendado:.2f} ton"
+        )
