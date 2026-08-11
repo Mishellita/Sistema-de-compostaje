@@ -2,3 +2,18 @@ modulo,parametro,estado,resultado,recomendacion,clave
 Capacidad de lodo,Estado de capacidad,ADMISIBLE,Aprobada,La cantidad de lodo propuesta cumple los criterios de C/N y humedad para la formulación inicial.,ESTADO DE CAPACIDAD|ADMISIBLE
 Capacidad de lodo,Estado de capacidad,ADMISIBLE CON AJUSTE DE HUMEDAD,Ajustar humedad,La cantidad de lodo es admisible por C/N pero se requiere incrementar la humedad de la mezcla hasta alcanzar el rango recomendado antes de conformar la pila.,ESTADO DE CAPACIDAD|ADMISIBLE CON AJUSTE DE HUMEDAD
 Capacidad de lodo,Estado de capacidad,NO ADMISIBLE,Reformular,La cantidad de lodo propuesta no cumple los criterios establecidos. Ajustar la cantidad de lodo y/o la composición de la mezcla antes de conformar la pila.,ESTADO DE CAPACIDAD|NO ADMISIBLE
+Formulacion 	Humedad inicial 	BAJA	Humedad < limite minimo de Mesófila I	Reformular 	Incrementar la humedad inicial de la mezcla antes de conformar la pila 	HUMEDAD INICIAL|BAJA
+Formulacion 	Humedad inicial 	ALTA	Humedad > limite maximo de Mesófila I	Reformular 	Incrementar el material estructurante para reducir la humedad de la mezcla 	HUMEDAD INICIAL|ALTA
+Formulacion 	Humedad inicial 	CORRECTA	Humedad dentro del rango 	Aprobada 	La humedad inciial es adecuada para iniciar el proceso 	HUMEDAD INICIAL|CORRECTA
+Formulacion 	Relacion C/N 	BAJO	C/N < limite minimo 	Reformular 	Incrementar materiales ricos en carbono, como aserrin, podas, etc 	RELACION C/N|BAJO
+Formulacion 	Relacion C/N 	ALTO	C/N > limite maximo 	Reformular 	incrementar materiales con mayor contenido de nitrogeno 	RELACION C/N|ALTO
+Formulacion 	Relacion C/N 	CORRECTO	C/N dentro del rango 	Aprobada 	La relacion C/N es adecuada 	RELACION C/N|CORRECTO
+Seguimiento	Temperatura 	BAJA	Temperatura < limite minimo 	Reformular 	Verificar humedad, mezcla y evolución de la actividad biológica.	TEMPERATURA|BAJA
+Seguimiento	Temperatura 	ALTA	Temperatura > limite maximo 	Reformular 	Realizar volteo y verificar aireación de la pila.	TEMPERATURA|ALTA
+Seguimiento	Temperatura 	CORRECTA	Temperatura dentro del rango 	Aprobada 	La temperatura se encuentra dentro del rango esperado.	TEMPERATURA|CORRECTA
+Seguimiento	pH	BAJO	pH < limite minimo 	Reformular 	Revisar composición de la mezcla y continuar el seguimiento del pH.	PH|BAJO
+Seguimiento	pH	ALTO	pH > limite maximo	Reformular 	Revisar composición de la mezcla y posibles pérdidas de nitrógeno.	PH|ALTO
+Seguimiento	pH	CORRECTO	pH  limite dentro del rango 	Aprobada 	El pH se encuentra dentro del rango esperado.	PH|CORRECTO
+Seguimiento	Humedad  	BAJA	Humedad < limite minimo 	Reformular 	Adicionar agua durante el volteo hasta alcanzar el rango recomendado.	HUMEDAD|BAJA
+Seguimiento	Humedad	ALTA	Humedad > limite maximo 	Reformular 	Incrementar material seco y revisar aireación o drenaje.	HUMEDAD|ALTA
+Seguimiento	Humedad	CORRECTA	Humedad dentro del rango 	Aprobada 	La humedad se encuentra dentro del rango esperado.	HUMEDAD|CORRECTA
