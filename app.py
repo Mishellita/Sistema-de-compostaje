@@ -258,3 +258,18 @@ nitrogeno_por_ton_lodo = (
     (1 - insumos["LD"]["humedad"] / 100)
     * insumos["LD"]["n"] / 100
 )
+denominador_cn = (
+    cn_min * nitrogeno_por_ton_lodo
+    - carbono_por_ton_lodo
+)
+
+if denominador_cn != 0:
+    lodo_por_cn = (
+        carbono_sin_lodo
+        - cn_min * nitrogeno_sin_lodo
+    ) / denominador_cn
+else:
+    lodo_por_cn = 0
+
+lodo_por_cn = max(0, lodo_por_cn)
+st.write("Lodo máximo por C/N:", round(lodo_por_cn, 4), "ton")
