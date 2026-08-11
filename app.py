@@ -130,21 +130,30 @@ elif menu == "Nueva Formulación":
             relacion_cn = (
                 carbono_pct / nitrogeno_pct
             )
-
-            if humedad_mezcla < 50:
+            
+            fila_mesofila = df_parametros[
+                df_parametros["fase"] == "Mesofila I"
+            ].iloc[0]
+            
+            hum_min = fila_mesofila["humedad_min"]
+            hum_max = fila_mesofila["humedad_max"]
+            cn_min = fila_mesofila["cn_min"]
+            cn_max = fila_mesofila["cn_max"]
+            
+            if humedad_mezcla < hum_min:
                 estado_humedad = "BAJA"
-            elif humedad_mezcla > 60:
+            elif humedad_mezcla > hum_max:
                 estado_humedad = "ALTA"
             else:
                 estado_humedad = "CORRECTA"
-
-            if relacion_cn < 25:
+            
+            if relacion_cn < cn_min:
                 estado_cn = "BAJO"
-            elif relacion_cn > 35:
+            elif relacion_cn > cn_max:
                 estado_cn = "ALTO"
             else:
                 estado_cn = "CORRECTO"
-
+            
             if (
                 estado_humedad == "CORRECTA"
                 and estado_cn == "CORRECTO"
