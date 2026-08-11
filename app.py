@@ -386,3 +386,27 @@ elif menu == "Capacidad de lodo":
             "Relación C/N resultante",
             f"{cn_resultante:.2f}"
         )
+    if (
+        cn_resultante < cn_min
+        or cn_resultante > cn_max
+        or humedad_resultante > hum_max
+    ):
+        estado_simulador = "NO ADMISIBLE"
+    
+    elif humedad_resultante < hum_min:
+        estado_simulador = "ADMISIBLE CON AJUSTE DE HUMEDAD"
+    
+    else:
+        estado_simulador = "ADMISIBLE"
+    st.subheader("Evaluación")
+
+    if estado_simulador == "ADMISIBLE":
+        st.success("Estado del simulador: ADMISIBLE")
+    
+    elif estado_simulador == "ADMISIBLE CON AJUSTE DE HUMEDAD":
+        st.warning(
+            "Estado del simulador: ADMISIBLE CON AJUSTE DE HUMEDAD"
+        )
+    
+    else:
+        st.error("Estado del simulador: NO ADMISIBLE")
