@@ -6,7 +6,7 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🌱 SAFCO")
+st.title(SAFCO")
 st.subheader("Sistema de Apoyo para Formulación de Compostaje")
 
 menu = st.sidebar.radio(
@@ -14,6 +14,7 @@ menu = st.sidebar.radio(
     [
         "Inicio",
         "Nueva Formulación",
+        "Capacidad de lodo",
         "Seguimiento",
         "Inventario",
         "Indicadores"
