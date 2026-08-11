@@ -410,3 +410,24 @@ elif menu == "Capacidad de lodo":
     
     else:
         st.error("Estado del simulador: NO ADMISIBLE")
+    if estado_simulador == "ADMISIBLE":
+        recomendacion = (
+            "La cantidad de lodo propuesta cumple los criterios "
+            "de C/N y humedad para la formulación inicial."
+        )
+    
+    elif estado_simulador == "ADMISIBLE CON AJUSTE DE HUMEDAD":
+        recomendacion = (
+            "La cantidad de lodo es admisible por C/N, pero se requiere "
+            "incrementar la humedad de la mezcla hasta alcanzar el rango "
+            "recomendado antes de conformar la pila."
+        )
+    
+    else:
+        recomendacion = (
+            "La cantidad de lodo propuesta no cumple los criterios establecidos. "
+            "Ajustar la cantidad de lodo y/o la composición de la mezcla "
+            "antes de conformar la pila."
+        )
+    
+    st.info(f"Recomendación: {recomendacion}")
