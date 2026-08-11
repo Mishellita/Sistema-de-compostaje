@@ -187,7 +187,29 @@ elif menu == "Nueva Formulación":
             st.write(
                 f"Estado Formulación: {estado_formulacion}"
             )
-
+    clave_humedad = f"HUMEDAD INICIAL|{estado_humedad}"
+    
+    fila_humedad = df_reglas[
+        df_reglas["clave"] == clave_humedad
+    ]
+    
+    clave_cn = f"RELACION C/N|{estado_cn}"
+    
+    fila_cn = df_reglas[
+        df_reglas["clave"] == clave_cn
+    ]
+    
+    if not fila_humedad.empty:
+        st.info(
+            f"Recomendación humedad: "
+            f"{fila_humedad.iloc[0]['recomendacion']}"
+        )
+    
+    if not fila_cn.empty:
+        st.info(
+            f"Recomendación C/N: "
+            f"{fila_cn.iloc[0]['recomendacion']}"
+        )
             if estado_humedad == "BAJA":
                 st.warning(
                     "Incrementar humedad antes de conformar la pila."
