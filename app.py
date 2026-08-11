@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 df_insumos = pd.read_csv("insumos.csv")
 df_parametros = pd.read_csv("parametros.csv")
+df_reglas = pd.read_csv("reglas.csv")
 insumos = {
     fila["codigo"]: {
         "humedad": fila["humedad"],
@@ -409,34 +410,14 @@ elif menu == "Capacidad de lodo":
         estado_simulador = "ADMISIBLE"
     st.subheader("Evaluación")
 
-    if estado_simulador == "ADMISIBLE":
-        st.success("Estado del simulador: ADMISIBLE")
+    clave_regla = f"ESTADO DE CAPACIDAD|{estado_simulador}"
     
-    elif estado_simulador == "ADMISIBLE CON AJUSTE DE HUMEDAD":
-        st.warning(
-            "Estado del simulador: ADMISIBLE CON AJUSTE DE HUMEDAD"
-        )
+    fila_regla = df_reglas[
+        df_reglas["clave"] == clave_regla
+    ]
     
+    if not fila_regla.empty:
+        recomendacion = fila_regla.iloc[0]["recomendacion"]
     else:
-        st.error("Estado del simulador: NO ADMISIBLE")
-    if estado_simulador == "ADMISIBLE":
-        recomendacion = (
-            "La cantidad de lodo propuesta cumple los criterios "
-            "de C/N y humedad para la formulación inicial."
-        )
-    
-    elif estado_simulador == "ADMISIBLE CON AJUSTE DE HUMEDAD":
-        recomendacion = (
-            "La cantidad de lodo es admisible por C/N, pero se requiere "
-            "incrementar la humedad de la mezcla hasta alcanzar el rango "
-            "recomendado antes de conformar la pila."
-        )
-    
-    else:
-        recomendacion = (
-            "La cantidad de lodo propuesta no cumple los criterios establecidos. "
-            "Ajustar la cantidad de lodo y/o la composición de la mezcla "
-            "antes de conformar la pila."
-        )
-    
+        recomendacion = "Regla no encontrada"
     st.info(f"Recomendación: {recomendacion}")
