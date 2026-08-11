@@ -204,6 +204,7 @@ elif menu == "Nueva Formulación":
                 st.warning(
                     "Agregar materiales ricos en nitrógeno."
                 )
+                
 elif menu == "Capacidad de lodo":
 
     st.header("Capacidad de lodo")
