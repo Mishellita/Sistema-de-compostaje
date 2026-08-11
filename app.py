@@ -114,55 +114,69 @@ elif menu == "Nueva Formulación":
             nitrogeno_total += nitrogeno
 
         if masa_total > 0:
-
+        
             humedad_mezcla = (
                 agua_total / masa_total
             ) * 100
-        if masa_seca_total > 0:
-            carbono_pct = (
-                carbono_total / masa_seca_total
-            ) * 100
         
-            nitrogeno_pct = (
-                nitrogeno_total / masa_seca_total
-            ) * 100
-        else:
-            carbono_pct = 0
-            nitrogeno_pct = 0
+            if masa_seca_total > 0:
         
-        if nitrogeno_total > 0:
-            relacion_cn = carbono_total / nitrogeno_total
-        else:
-            relacion_cn = 0
-            
+                carbono_pct = (
+                    carbono_total / masa_seca_total
+                ) * 100
+        
+                nitrogeno_pct = (
+                    nitrogeno_total / masa_seca_total
+                ) * 100
+        
+            else:
+        
+                carbono_pct = 0
+                nitrogeno_pct = 0
+        
+            if nitrogeno_total > 0:
+        
+                relacion_cn = (
+                    carbono_total / nitrogeno_total
+                )
+        
+            else:
+        
+                relacion_cn = 0
+        
             fila_mesofila = df_parametros[
                 df_parametros["fase"] == "Mesofila I"
             ].iloc[0]
-            
+        
             hum_min = fila_mesofila["humedad_min"]
             hum_max = fila_mesofila["humedad_max"]
             cn_min = fila_mesofila["cn_min"]
             cn_max = fila_mesofila["cn_max"]
-            
+        
             if humedad_mezcla < hum_min:
                 estado_humedad = "BAJA"
+        
             elif humedad_mezcla > hum_max:
                 estado_humedad = "ALTA"
+        
             else:
                 estado_humedad = "CORRECTA"
-            
+        
             if relacion_cn < cn_min:
                 estado_cn = "BAJO"
+        
             elif relacion_cn > cn_max:
                 estado_cn = "ALTO"
+        
             else:
                 estado_cn = "CORRECTO"
-            
+        
             if (
                 estado_humedad == "CORRECTA"
                 and estado_cn == "CORRECTO"
             ):
                 estado_formulacion = "APROBADA"
+        
             else:
                 estado_formulacion = "REFORMULAR"
 
