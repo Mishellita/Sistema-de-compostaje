@@ -301,3 +301,12 @@ elif menu == "Capacidad de lodo":
             round(lodo_por_humedad, 4),
             "ton"
     )
+    if lodo_por_humedad is None:
+        lodo_recomendado = lodo_por_cn
+    else:
+        lodo_recomendado = min(lodo_por_cn, lodo_por_humedad)
+        st.write(
+        "Lodo recomendado:",
+        round(lodo_recomendado, 4),
+        "ton"
+    )
