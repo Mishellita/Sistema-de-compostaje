@@ -365,3 +365,24 @@ elif menu == "Capacidad de lodo":
         cn_resultante = carbono_final / nitrogeno_final
     else:
         cn_resultante = 0
+    st.subheader("Resultados de la formulación")
+    
+    col4, col5, col6 = st.columns(3)
+    
+    with col4:
+        st.metric(
+            "Masa total de formulación",
+            f"{masa_total_formulacion:.2f} ton"
+        )
+    
+    with col5:
+        st.metric(
+            "Humedad resultante",
+            f"{humedad_resultante:.2f}%"
+        )
+    
+    with col6:
+        st.metric(
+            "Relación C/N resultante",
+            f"{cn_resultante:.2f}"
+        )
