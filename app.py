@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 df_insumos = pd.read_csv("insumos.csv")
+df_parametros = pd.read_csv("parametros.csv")
 insumos = {
     fila["codigo"]: {
         "humedad": fila["humedad"],
@@ -235,10 +236,14 @@ elif menu == "Capacidad de lodo":
         value=0.0,
         key="ca_cap"
     )
-    cn_min = 25
-    cn_max = 35
-    hum_min = 50
-    hum_max = 60
+    fila_mesofila = df_parametros[
+        df_parametros["fase"] == "Mesofila I"
+    ].iloc[0]
+    
+    hum_min = fila_mesofila["humedad_min"]
+    hum_max = fila_mesofila["humedad_max"]
+    cn_min = fila_mesofila["cn_min"]
+    cn_max = fila_mesofila["cn_max"]
     
     carbono_sin_lodo = (
         ro_cap * (1 - insumos["RO"]["humedad"] / 100) * insumos["RO"]["c"] / 100
