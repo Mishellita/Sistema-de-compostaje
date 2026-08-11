@@ -409,7 +409,15 @@ elif menu == "Capacidad de lodo":
     else:
         estado_simulador = "ADMISIBLE"
     st.subheader("Evaluación")
-
+    if estado_simulador == "ADMISIBLE":
+        st.success("Resultado: ADMISIBLE")
+    
+    elif estado_simulador == "ADMISIBLE CON AJUSTE DE HUMEDAD":
+        st.warning("Resultado: ADMISIBLE CON AJUSTE DE HUMEDAD")
+    
+    else:
+        st.error("Resultado: NO ADMISIBLE")
+    
     clave_regla = f"ESTADO DE CAPACIDAD|{estado_simulador}"
     
     fila_regla = df_reglas[
