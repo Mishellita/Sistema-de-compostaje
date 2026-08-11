@@ -293,13 +293,10 @@ else:
         humedad_lodo - humedad_max
     )
 if lodo_por_humedad is None:
-    st.write("Límite por humedad: 
-NO LIMITA")
+    st.write("Límite por humedad: NO LIMITA")
 else:
     st.write(
-        "Lodo máximo por 
-humedad:",
-        round(lodo_por_humedad, 
-4),
+        "Lodo máximo por humedad:",
+        round(lodo_por_humedad, 4),
         "ton"
     )
