@@ -712,7 +712,23 @@ elif menu == "Inventario":
             stock_disponible_lote = 0
     else:
         stock_disponible_lote = 0
-    if st.button("Registrar movimiento"):
+
+if st.button("Registrar movimiento"):
+
+    salida_solicitada = salida_rem + salida_don
+
+    stock_disponible_con_ingreso = (
+        stock_disponible_lote + compost_ingreso
+    )
+
+    if salida_solicitada > stock_disponible_con_ingreso:
+
+        st.error(
+            "Movimiento no permitido: la salida solicitada "
+            "supera el stock disponible del lote."
+        )
+
+    else:
 
         nuevo_movimiento = pd.DataFrame([{
             "fecha": fecha_inv,
