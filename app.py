@@ -810,3 +810,39 @@ if st.button("Registrar movimiento"):
         df_Inventario,
         use_container_width=True
     )
+elif menu == "Indicadores":
+    st.header("Indicadores")
+    
+    df_inv = pd.read_csv("Inventario.csv")
+    
+    for columna in [
+        "compost_ingresado",
+        "salida_remediacion",
+        "salida_donacion"
+    ]:
+        df_inv[columna] = pd.to_numeric(
+            df_inv[columna],
+            errors="coerce"
+        ).fillna(0)
+    
+    compost_producido = df_inv["compost_ingresado"].sum()
+    
+    stock_total = (
+        df_inv["compost_ingresado"].sum()
+        - df_inv["salida_remediacion"].sum()
+        - df_inv["salida_donacion"].sum()
+    )
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.metric(
+            "Compost producido",
+            f"{compost_producido:.2f} ton"
+        )
+    
+    with col2:
+        st.metric(
+            "Stock total disponible",
+            f"{stock_total:.2f} ton"
+        )
