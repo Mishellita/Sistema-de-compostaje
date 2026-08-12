@@ -639,7 +639,8 @@ elif menu == "Seguimiento":
             "Los parámetros evaluados se encuentran dentro de los rangos "
             "esperados para la fase seleccionada."
         )
-    elif menu == "Inventario":
+
+elif menu == "Inventario":
     st.header("Inventario de compost")
     
     fecha_inv = st.date_input(
