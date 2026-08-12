@@ -685,7 +685,7 @@ elif menu == "Inventario":
         }])
     
         nuevo_movimiento.to_csv(
-            "inventario.csv",
+            "Inventario.csv",
             mode="a",
             header=False,
             index=False
@@ -693,7 +693,7 @@ elif menu == "Inventario":
     
     st.success("Movimiento registrado correctamente")
 
-    df_inventario = pd.read_csv("inventario.csv")
+    df_Inventario = pd.read_csv("Inventario.csv")
     columnas_numericas = [
         "compost_ingresado",
         "salida_remediacion",
@@ -701,25 +701,25 @@ elif menu == "Inventario":
     ]
     
     for columna in columnas_numericas:
-        df_inventario[columna] = pd.to_numeric(
-            df_inventario[columna],
+        df_Inventario[columna] = pd.to_numeric(
+            df_Inventario[columna],
             errors="coerce"
         ).fillna(0)
-    df_inventario["movimiento_neto"] = (
-        df_inventario["compost_ingresado"]
-        - df_inventario["salida_remediacion"]
-        - df_inventario["salida_donacion"]
+    df_Inventario["movimiento_neto"] = (
+        df_Inventario["compost_ingresado"]
+        - df_Inventario["salida_remediacion"]
+        - df_Inventario["salida_donacion"]
     )
     
-    df_inventario["stock_acumulado"] = (
-        df_inventario["movimiento_neto"].cumsum()
+    df_Inventario["stock_acumulado"] = (
+        df_Inventario["movimiento_neto"].cumsum()
     )
 
-    if not df_inventario.empty:
+    if not df_Inventario.empty:
     
-        stock_actual = df_inventario["stock_acumulado"].iloc[-1]
+        stock_actual = df_Inventario["stock_acumulado"].iloc[-1]
     
-        st.subheader("Estado del inventario")
+        st.subheader("Estado del Inventario")
     
         st.metric(
             "Stock disponible",
@@ -728,6 +728,6 @@ elif menu == "Inventario":
     st.subheader("Historial de movimientos")
     
     st.dataframe(
-        df_inventario,
+        df_Inventario,
         use_container_width=True
     )
