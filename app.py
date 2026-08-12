@@ -641,93 +641,103 @@ elif menu == "Seguimiento":
         )
 
 elif menu == "Inventario":
-    
+
     st.header("Inventario de compost")
-    
+
     fecha_inv = st.date_input(
         "Fecha",
         key="fecha_inv"
     )
-    
+
+    operador_inv = st.text_input(
+        "Operador",
+        key="operador_inv"
+    )
+
     lote_inv = st.text_input(
         "Código de lote",
         key="lote_inv"
     )
-    
+
+    numero_ficha = st.text_input(
+        "Número de ficha de pesaje",
+        key="numero_ficha"
+    )
+
     compost_ingreso = st.number_input(
         "Compost ingresado a stock (ton)",
         min_value=0.0,
         value=0.0,
         key="compost_ingreso"
     )
-    
+
     salida_rem = st.number_input(
         "Salida para remediación (ton)",
         min_value=0.0,
         value=0.0,
         key="salida_rem"
     )
-    
+
     salida_don = st.number_input(
         "Salida para donación (ton)",
         min_value=0.0,
         value=0.0,
         key="salida_don"
     )
+
     if st.button("Registrar movimiento"):
-    
+
         nuevo_movimiento = pd.DataFrame([{
             "fecha": fecha_inv,
+            "operador": operador_inv,
             "codigo_lote": lote_inv,
+            "numero_ficha": numero_ficha,
             "compost_ingresado": compost_ingreso,
             "salida_remediacion": salida_rem,
             "salida_donacion": salida_don
         }])
-    
+
         nuevo_movimiento.to_csv(
             "Inventario.csv",
             mode="a",
             header=False,
             index=False
         )
-    
-    st.success("Movimiento registrado correctamente")
+
+        st.success("Movimiento registrado correctamente")
 
     df_Inventario = pd.read_csv("Inventario.csv")
+
     columnas_numericas = [
         "compost_ingresado",
         "salida_remediacion",
         "salida_donacion"
     ]
-    
+
     for columna in columnas_numericas:
         df_Inventario[columna] = pd.to_numeric(
             df_Inventario[columna],
             errors="coerce"
         ).fillna(0)
+
     df_Inventario["movimiento_neto"] = (
         df_Inventario["compost_ingresado"]
         - df_Inventario["salida_remediacion"]
         - df_Inventario["salida_donacion"]
     )
-    
-    df_Inventario["stock_acumulado"] = (
-        df_Inventario["movimiento_neto"].cumsum()
+
+    df_Inventario["stock_acumulado_lote"] = (
+        df_Inventario
+        .groupby("codigo_lote")["movimiento_neto"]
+        .cumsum()
     )
 
-    if not df_Inventario.empty:
-    
-        stock_actual = df_Inventario["stock_acumulado"].iloc[-1]
-    
-        st.subheader("Estado del Inventario")
-    
-        st.metric(
-            "Stock disponible",
-            f"{stock_actual:.2f} ton"
-        )
-    st.subheader("Historial de movimientos")
-    
-    st.dataframe(
-        df_Inventario,
-        use_container_width=True
-    )
+    movimientos_lote = df_Inventario[
+        df_Inventario["codigo_lote"] == lote_inv
+    ]
+
+    stock_total = df_Inventario["movimiento_neto"].sum()
+
+    if not movimientos_lote.empty:
+        stock_lote = movimientos_lote[
+            "stock_acumulado_l
