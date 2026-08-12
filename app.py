@@ -655,7 +655,7 @@ elif menu == "Seguimiento":
         }])
     
         nuevo_seguimiento.to_csv(
-            "Seguimiento.csv",
+            "seguimiento.csv",
             mode="a",
             header=False,
             index=False
@@ -744,33 +744,33 @@ elif menu == "Inventario":
             stock_disponible_lote + compost_ingreso
         )
 
-    if salida_solicitada > stock_disponible_con_ingreso:
-
-        st.error(
-            "Movimiento no permitido: la salida solicitada "
-            "supera el stock disponible del lote."
-        )
-
-    else:
-
-        nuevo_movimiento = pd.DataFrame([{
-            "fecha": fecha_inv,
-            "operador": operador_inv,
-            "codigo_lote": lote_inv,
-            "numero_ficha": numero_ficha,
-            "compost_ingresado": compost_ingreso,
-            "salida_remediacion": salida_rem,
-            "salida_donacion": salida_don
-        }])
-
-        nuevo_movimiento.to_csv(
-            "Inventario.csv",
-            mode="a",
-            header=False,
-            index=False
-        )
-
-        st.success("Movimiento registrado correctamente")
+        if salida_solicitada > stock_disponible_con_ingreso:
+    
+            st.error(
+                "Movimiento no permitido: la salida solicitada "
+                "supera el stock disponible del lote."
+            )
+    
+        else:
+    
+            nuevo_movimiento = pd.DataFrame([{
+                "fecha": fecha_inv,
+                "operador": operador_inv,
+                "codigo_lote": lote_inv,
+                "numero_ficha": numero_ficha,
+                "compost_ingresado": compost_ingreso,
+                "salida_remediacion": salida_rem,
+                "salida_donacion": salida_don
+            }])
+    
+            nuevo_movimiento.to_csv(
+                "Inventario.csv",
+                mode="a",
+                header=False,
+                index=False
+            )
+    
+            st.success("Movimiento registrado correctamente")
 
     df_Inventario = pd.read_csv("Inventario.csv")
 
@@ -873,18 +873,31 @@ elif menu == "Indicadores":
     
     if not df_seg.empty:
     
+        df_seg["estado_general"] = (
+            df_seg["estado_general"]
+            .astype(str)
+            .str.strip()
+            .str.upper()
+        )
+    
+        total_seguimientos = len(df_seg)
+    
         numero_alertas = (
             df_seg["estado_general"]
             == "REQUIERE AJUSTE OPERATIVO"
         ).sum()
     
-        total_seguimientos = len(df_seg)
+        operaciones_normales = (
+            df_seg["estado_general"]
+            == "OPERACION NORMAL"
+        ).sum()
     
     else:
-        numero_alertas = 0
         total_seguimientos = 0
-
-    col3, col4 = st.columns(2)
+        numero_alertas = 0
+        operaciones_normales = 0
+    
+    col3, col4, col5 = st.columns(3)
     
     with col3:
         st.metric(
@@ -895,5 +908,11 @@ elif menu == "Indicadores":
     with col4:
         st.metric(
             "Alertas de seguimiento",
-            numero_alertas
+            int(numero_alertas)
+        )
+    
+    with col5:
+        st.metric(
+            "Operaciones normales",
+            int(operaciones_normales)
         )
