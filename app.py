@@ -297,23 +297,44 @@ elif menu == "Nueva Formulación":
                 "para realizar la formulación."
             )
 
-    st.subheader("Historial de formulaciones")
-    
-    df_form_hist = pd.read_csv("formulaciones.csv")
-    
-    if not df_form_hist.empty:
-    
-        st.dataframe(
-            df_form_hist,
-            use_container_width=True
-        )
-    
+st.subheader("Historial de formulaciones")
+
+df_form_hist = pd.read_csv("formulaciones.csv")
+
+if not df_form_hist.empty:
+
+    lotes_disponibles = sorted(
+        df_form_hist["codigo_lote"]
+        .dropna()
+        .astype(str)
+        .unique()
+    )
+
+    lote_filtro = st.selectbox(
+        "Seleccionar código de lote",
+        ["Todos"] + lotes_disponibles,
+        key="filtro_lote_formulacion"
+    )
+
+    if lote_filtro == "Todos":
+        df_form_filtrado = df_form_hist
     else:
-    
-        st.info(
-            "Aún no existen formulaciones registradas."
-        ) 
-    
+        df_form_filtrado = df_form_hist[
+            df_form_hist["codigo_lote"].astype(str)
+            == lote_filtro
+        ]
+
+    st.dataframe(
+        df_form_filtrado,
+        use_container_width=True
+    )
+
+else:
+
+    st.info(
+        "Aún no existen formulaciones registradas."
+    )
+
 elif menu == "Capacidad de lodo":
 
     st.header("Capacidad de lodo")
