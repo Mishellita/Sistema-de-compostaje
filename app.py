@@ -487,3 +487,60 @@ elif menu == "Seguimiento":
     
     ph_min = fila_fase["ph_min"]
     ph_max = fila_fase["ph_max"]
+
+    temp1 = st.number_input(
+        "Temperatura 1 (°C)",
+        min_value=0.0,
+        value=0.0,
+        key="temp1"
+    )
+    
+    temp2 = st.number_input(
+        "Temperatura 2 (°C)",
+        min_value=0.0,
+        value=0.0,
+        key="temp2"
+    )
+    
+    temp3 = st.number_input(
+        "Temperatura 3 (°C)",
+        min_value=0.0,
+        value=0.0,
+        key="temp3"
+    )
+    
+    humedad_seg = st.number_input(
+        "Humedad medida (%)",
+        min_value=0.0,
+        value=0.0,
+        key="humedad_seg"
+    )
+    
+    ph1 = st.number_input(
+        "pH 1",
+        min_value=0.0,
+        value=0.0,
+        key="ph1"
+    )
+    
+    ph2 = st.number_input(
+        "pH 2",
+        min_value=0.0,
+        value=0.0,
+        key="ph2"
+    )
+    
+    ph3 = st.number_input(
+        "pH 3",
+        min_value=0.0,
+        value=0.0,
+        key="ph3"
+    )
+    
+    volteos = st.number_input(
+        "Número de volteos",
+        min_value=0,
+        value=0,
+        step=1,
+        key="volteos"
+    )
