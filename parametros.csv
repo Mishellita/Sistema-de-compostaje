@@ -1,5 +1,5 @@
-fase,humedad_min,humedad_max,cn_min,cn_max
-Mesofila I,50,60,25,35
-Termofila,45,55,15,20
-Mesofila II,45,50,15,20
-Maduracion,30,40,10,15
+fase,temperatura_min,temperatura_max,humedad_min,humedad_max,ph_min,ph_max,cn_min,cn_max
+Mesofila I,40,55,50,60,5.5,6.5,25,35
+Termofila,55,65,45,55,6,8.5,15,20
+Mesofila II,40,45,45,50,6.5,7.5,15,20
+Maduracion,20,30,30,40,6.5,7,10,15
