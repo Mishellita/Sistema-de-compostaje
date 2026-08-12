@@ -892,11 +892,17 @@ elif menu == "Inventario":
         df_Inventario,
         use_container_width=True
     )
+
 elif menu == "Indicadores":
+
     st.header("Indicadores")
-    
+
+    # =========================
+    # INDICADORES DE INVENTARIO
+    # =========================
+
     df_inv = pd.read_csv("Inventario.csv")
-    
+
     for columna in [
         "compost_ingresado",
         "salida_remediacion",
@@ -906,72 +912,134 @@ elif menu == "Indicadores":
             df_inv[columna],
             errors="coerce"
         ).fillna(0)
-    
+
     compost_producido = df_inv["compost_ingresado"].sum()
-    
+
     stock_total = (
         df_inv["compost_ingresado"].sum()
         - df_inv["salida_remediacion"].sum()
         - df_inv["salida_donacion"].sum()
     )
-    
+
     col1, col2 = st.columns(2)
-    
+
     with col1:
         st.metric(
             "Compost producido",
             f"{compost_producido:.2f} ton"
         )
-    
+
     with col2:
         st.metric(
             "Stock total disponible",
             f"{stock_total:.2f} ton"
         )
+
+    # =========================
+    # INDICADORES DE SEGUIMIENTO
+    # =========================
+
     df_seg = pd.read_csv("seguimiento.csv")
-    
+
     if not df_seg.empty:
-    
+
         df_seg["estado_general"] = (
             df_seg["estado_general"]
             .astype(str)
             .str.strip()
             .str.upper()
         )
-    
+
         total_seguimientos = len(df_seg)
-    
+
         numero_alertas = (
             df_seg["estado_general"]
             == "REQUIERE AJUSTE OPERATIVO"
         ).sum()
-    
+
         operaciones_normales = (
             df_seg["estado_general"]
             == "OPERACION NORMAL"
         ).sum()
-    
+
     else:
         total_seguimientos = 0
         numero_alertas = 0
         operaciones_normales = 0
-    
+
     col3, col4, col5 = st.columns(3)
-    
+
     with col3:
         st.metric(
             "Seguimientos registrados",
             total_seguimientos
         )
-    
+
     with col4:
         st.metric(
             "Alertas de seguimiento",
             int(numero_alertas)
         )
-    
+
     with col5:
         st.metric(
             "Operaciones normales",
             int(operaciones_normales)
+        )
+
+    # =========================
+    # INDICADORES DE FORMULACIÓN
+    # =========================
+
+    df_form = pd.read_csv("formulaciones.csv")
+
+    for columna in [
+        "ro",
+        "rod",
+        "ld",
+        "ca",
+        "masa_total"
+    ]:
+        df_form[columna] = pd.to_numeric(
+            df_form[columna],
+            errors="coerce"
+        ).fillna(0)
+
+    total_residuos = df_form["masa_total"].sum()
+
+    residuos_organicos_valorizados = (
+        df_form["ro"].sum()
+        + df_form["rod"].sum()
+    )
+
+    lodo_valorizado = df_form["ld"].sum()
+
+    material_estructurante = df_form["ca"].sum()
+
+    st.subheader("Valorización de residuos")
+
+    col6, col7, col8, col9 = st.columns(4)
+
+    with col6:
+        st.metric(
+            "Total de materiales ingresados",
+            f"{total_residuos:.2f} ton"
+        )
+
+    with col7:
+        st.metric(
+            "Residuos orgánicos valorizados",
+            f"{residuos_organicos_valorizados:.2f} ton"
+        )
+
+    with col8:
+        st.metric(
+            "Lodo valorizado",
+            f"{lodo_valorizado:.2f} ton"
+        )
+
+    with col9:
+        st.metric(
+            "Material estructurante utilizado",
+            f"{material_estructurante:.2f} ton"
         )
