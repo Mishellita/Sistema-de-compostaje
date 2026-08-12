@@ -736,13 +736,13 @@ elif menu == "Inventario":
     else:
         stock_disponible_lote = 0
 
-if st.button("Registrar movimiento"):
-
-    salida_solicitada = salida_rem + salida_don
-
-    stock_disponible_con_ingreso = (
-        stock_disponible_lote + compost_ingreso
-    )
+    if st.button("Registrar movimiento"):
+    
+        salida_solicitada = salida_rem + salida_don
+    
+        stock_disponible_con_ingreso = (
+            stock_disponible_lote + compost_ingreso
+        )
 
     if salida_solicitada > stock_disponible_con_ingreso:
 
