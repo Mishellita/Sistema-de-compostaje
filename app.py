@@ -641,6 +641,7 @@ elif menu == "Seguimiento":
         )
 
 elif menu == "Inventario":
+    
     st.header("Inventario de compost")
     
     fecha_inv = st.date_input(
@@ -672,4 +673,51 @@ elif menu == "Inventario":
         min_value=0.0,
         value=0.0,
         key="salida_don"
+    )
+    if st.button("Registrar movimiento"):
+    
+        nuevo_movimiento = pd.DataFrame([{
+            "fecha": fecha_inv,
+            "codigo_lote": lote_inv,
+            "compost_ingresado": compost_ingreso,
+            "salida_remediacion": salida_rem,
+            "salida_donacion": salida_don
+        }])
+    
+        nuevo_movimiento.to_csv(
+            "inventario.csv",
+            mode="a",
+            header=False,
+            index=False
+        )
+    
+        st.success("Movimiento registrado correctamente")
+
+    df_inventario = pd.read_csv("inventario.csv")
+
+    df_inventario["movimiento_neto"] = (
+        df_inventario["compost_ingresado"]
+        - df_inventario["salida_remediacion"]
+        - df_inventario["salida_donacion"]
+    )
+    
+    df_inventario["stock_acumulado"] = (
+        df_inventario["movimiento_neto"].cumsum()
+    )
+
+    if not df_inventario.empty:
+    
+        stock_actual = df_inventario["stock_acumulado"].iloc[-1]
+    
+        st.subheader("Estado del inventario")
+    
+        st.metric(
+            "Stock disponible",
+            f"{stock_actual:.2f} ton"
+        )
+    st.subheader("Historial de movimientos")
+    
+    st.dataframe(
+        df_inventario,
+        use_container_width=True
     )
