@@ -869,3 +869,31 @@ elif menu == "Indicadores":
             "Stock total disponible",
             f"{stock_total:.2f} ton"
         )
+    df_seg = pd.read_csv("Seguimiento.csv")
+    
+    if not df_seg.empty:
+    
+        numero_alertas = (
+            df_seg["estado_general"]
+            == "REQUIERE AJUSTE OPERATIVO"
+        ).sum()
+    
+        total_seguimientos = len(df_seg)
+    
+    else:
+        numero_alertas = 0
+        total_seguimientos = 0
+
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        st.metric(
+            "Seguimientos registrados",
+            total_seguimientos
+        )
+    
+    with col4:
+        st.metric(
+            "Alertas de seguimiento",
+            numero_alertas
+        )
