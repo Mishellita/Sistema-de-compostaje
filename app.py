@@ -568,14 +568,30 @@ elif menu == "Seguimiento":
     else:
         estado_ph = "CORRECTO"
         
-    st.write("Temperatura promedio:", round(temp_prom, 2))
-    st.write("Estado temperatura:", estado_temp)
+    st.subheader("Resultados del seguimiento")
     
-    st.write("Humedad:", humedad_seg)
-    st.write("Estado humedad:", estado_hum)
+    col1, col2, col3 = st.columns(3)
     
-    st.write("pH promedio:", round(ph_prom, 2))
-    st.write("Estado pH:", estado_ph)
+    with col1:
+        st.metric(
+            "Temperatura promedio",
+            f"{temp_prom:.2f} °C"
+        )
+        st.caption(f"Estado: {estado_temp}")
+    
+    with col2:
+        st.metric(
+            "Humedad",
+            f"{humedad_seg:.2f}%"
+        )
+        st.caption(f"Estado: {estado_hum}")
+    
+    with col3:
+        st.metric(
+            "pH promedio",
+            f"{ph_prom:.2f}"
+        )
+        st.caption(f"Estado: {estado_ph}")
 
     if (
         estado_temp == "CORRECTA"
