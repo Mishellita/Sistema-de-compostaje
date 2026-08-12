@@ -544,3 +544,35 @@ elif menu == "Seguimiento":
         step=1,
         key="volteos"
     )
+    temp_prom = (temp1 + temp2 + temp3) / 3
+    ph_prom = (ph1 + ph2 + ph3) / 3
+
+    if temp_prom < temp_min:
+        estado_temp = "BAJA"
+    elif temp_prom > temp_max:
+        estado_temp = "ALTA"
+    else:
+        estado_temp = "CORRECTA"
+    
+    if humedad_seg < hum_min_seg:
+        estado_hum = "BAJA"
+    elif humedad_seg > hum_max_seg:
+        estado_hum = "ALTA"
+    else:
+        estado_hum = "CORRECTA"
+    
+    if ph_prom < ph_min:
+        estado_ph = "BAJO"
+    elif ph_prom > ph_max:
+        estado_ph = "ALTO"
+    else:
+        estado_ph = "CORRECTO"
+        
+    st.write("Temperatura promedio:", round(temp_prom, 2))
+    st.write("Estado temperatura:", estado_temp)
+    
+    st.write("Humedad:", humedad_seg)
+    st.write("Estado humedad:", estado_hum)
+    
+    st.write("pH promedio:", round(ph_prom, 2))
+    st.write("Estado pH:", estado_ph)
