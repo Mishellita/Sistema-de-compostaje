@@ -869,7 +869,7 @@ elif menu == "Indicadores":
             "Stock total disponible",
             f"{stock_total:.2f} ton"
         )
-    df_seg = pd.read_csv("Seguimiento.csv")
+    df_seg = pd.read_csv("seguimiento.csv")
     
     if not df_seg.empty:
     
