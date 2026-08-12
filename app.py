@@ -740,4 +740,4 @@ elif menu == "Inventario":
 
     if not movimientos_lote.empty:
         stock_lote = movimientos_lote[
-            "stock_acumulado_l
+            "stock_acumulado_l]
