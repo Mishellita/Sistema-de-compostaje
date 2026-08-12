@@ -639,3 +639,36 @@ elif menu == "Seguimiento":
             "Los parámetros evaluados se encuentran dentro de los rangos "
             "esperados para la fase seleccionada."
         )
+    elif menu == "Inventario":
+    st.header("Inventario de compost")
+    
+    fecha_inv = st.date_input(
+        "Fecha",
+        key="fecha_inv"
+    )
+    
+    lote_inv = st.text_input(
+        "Código de lote",
+        key="lote_inv"
+    )
+    
+    compost_ingreso = st.number_input(
+        "Compost ingresado a stock (ton)",
+        min_value=0.0,
+        value=0.0,
+        key="compost_ingreso"
+    )
+    
+    salida_rem = st.number_input(
+        "Salida para remediación (ton)",
+        min_value=0.0,
+        value=0.0,
+        key="salida_rem"
+    )
+    
+    salida_don = st.number_input(
+        "Salida para donación (ton)",
+        min_value=0.0,
+        value=0.0,
+        key="salida_don"
+    )
