@@ -639,6 +639,29 @@ elif menu == "Seguimiento":
             "Los parámetros evaluados se encuentran dentro de los rangos "
             "esperados para la fase seleccionada."
         )
+    if st.button("Registrar seguimiento"):
+    
+        nuevo_seguimiento = pd.DataFrame([{
+            "fecha": fecha_seg,
+            "codigo_lote": lote_seg,
+            "fase": fase_seg,
+            "temperatura_promedio": temp_prom,
+            "humedad": humedad_seg,
+            "ph_promedio": ph_prom,
+            "estado_temperatura": estado_temp,
+            "estado_humedad": estado_hum,
+            "estado_ph": estado_ph,
+            "estado_general": estado_general
+        }])
+    
+        nuevo_seguimiento.to_csv(
+            "Seguimiento.csv",
+            mode="a",
+            header=False,
+            index=False
+        )
+    
+        st.success("Seguimiento registrado correctamente")
 elif menu == "Inventario":
 
     st.header("Inventario de compost")
