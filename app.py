@@ -691,10 +691,20 @@ elif menu == "Inventario":
             index=False
         )
     
-        st.success("Movimiento registrado correctamente")
+    st.success("Movimiento registrado correctamente")
 
     df_inventario = pd.read_csv("inventario.csv")
-
+    columnas_numericas = [
+        "compost_ingresado",
+        "salida_remediacion",
+        "salida_donacion"
+    ]
+    
+    for columna in columnas_numericas:
+        df_inventario[columna] = pd.to_numeric(
+            df_inventario[columna],
+            errors="coerce"
+        ).fillna(0)
     df_inventario["movimiento_neto"] = (
         df_inventario["compost_ingresado"]
         - df_inventario["salida_remediacion"]
