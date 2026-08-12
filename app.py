@@ -330,6 +330,8 @@ elif menu == "Capacidad de lodo":
         ) / (
             humedad_lodo - humedad_max
         )
+        lodo_por_humedad = max(0, lodo_por_humedad)
+        
     if lodo_por_humedad is None:
         st.write("Límite por humedad: NO LIMITA")
     else:
@@ -342,11 +344,7 @@ elif menu == "Capacidad de lodo":
         lodo_recomendado = lodo_por_cn
     else:
         lodo_recomendado = min(lodo_por_cn, lodo_por_humedad)
-        st.write(
-            "Lodo recomendado:",
-            round(lodo_recomendado, 4),
-            "ton"
-        )
+
     st.subheader("Resultado del simulador")
     
     col1, col2, col3 = st.columns(3)
