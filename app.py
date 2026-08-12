@@ -683,7 +683,35 @@ elif menu == "Inventario":
         value=0.0,
         key="salida_don"
     )
-
+    # Stock disponible del lote antes del nuevo movimiento
+    df_actual = pd.read_csv("Inventario.csv")
+    
+    if not df_actual.empty:
+    
+        for columna in [
+            "compost_ingresado",
+            "salida_remediacion",
+            "salida_donacion"
+        ]:
+            df_actual[columna] = pd.to_numeric(
+                df_actual[columna],
+                errors="coerce"
+            ).fillna(0)
+    
+        df_lote_actual = df_actual[
+            df_actual["codigo_lote"] == lote_inv
+        ]
+    
+        if not df_lote_actual.empty:
+            stock_disponible_lote = (
+                df_lote_actual["compost_ingresado"].sum()
+                - df_lote_actual["salida_remediacion"].sum()
+                - df_lote_actual["salida_donacion"].sum()
+            )
+        else:
+            stock_disponible_lote = 0
+    else:
+        stock_disponible_lote = 0
     if st.button("Registrar movimiento"):
 
         nuevo_movimiento = pd.DataFrame([{
