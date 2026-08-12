@@ -296,7 +296,23 @@ elif menu == "Nueva Formulación":
                 "Ingrese al menos una cantidad de material "
                 "para realizar la formulación."
             )
-                    
+
+st.subheader("Historial de formulaciones")
+
+df_form_hist = pd.read_csv("formulaciones.csv")
+
+if not df_form_hist.empty:
+
+    st.dataframe(
+        df_form_hist,
+        use_container_width=True
+    )
+
+else:
+
+    st.info(
+        "Aún no existen formulaciones registradas."
+    )       
 elif menu == "Capacidad de lodo":
 
     st.header("Capacidad de lodo")
