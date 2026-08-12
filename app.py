@@ -738,6 +738,32 @@ elif menu == "Inventario":
 
     stock_total = df_Inventario["movimiento_neto"].sum()
 
-    if not movimientos_lote.empty:
+   if not movimientos_lote.empty:
         stock_lote = movimientos_lote[
-            "stock_acumulado_l]
+            "stock_acumulado_lote"
+        ].iloc[-1]
+    else:
+        stock_lote = 0
+
+    st.subheader("Estado del Inventario")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.metric(
+            "Stock del lote",
+            f"{stock_lote:.2f} ton"
+        )
+
+    with col2:
+        st.metric(
+            "Stock total disponible",
+            f"{stock_total:.2f} ton"
+        )
+
+    st.subheader("Historial de movimientos")
+
+    st.dataframe(
+        df_Inventario,
+        use_container_width=True
+    )
