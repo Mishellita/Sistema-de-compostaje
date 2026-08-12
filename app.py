@@ -576,3 +576,50 @@ elif menu == "Seguimiento":
     
     st.write("pH promedio:", round(ph_prom, 2))
     st.write("Estado pH:", estado_ph)
+
+    if (
+        estado_temp == "CORRECTA"
+        and estado_hum == "CORRECTA"
+        and estado_ph == "CORRECTO"
+    ):
+        estado_general = "OPERACION NORMAL"
+    else:
+        estado_general = "REQUIERE AJUSTE OPERATIVO"
+
+    st.subheader("Evaluación del seguimiento")
+    
+    if estado_general == "OPERACION NORMAL":
+        st.success("Resultado: OPERACIÓN NORMAL")
+    else:
+        st.warning("Resultado: REQUIERE AJUSTE OPERATIVO")
+    
+    clave_temp = f"TEMPERATURA|{estado_temp}"
+    clave_hum = f"HUMEDAD|{estado_hum}"
+    clave_ph = f"PH|{estado_ph}"
+    
+    fila_temp = df_reglas[df_reglas["clave"] == clave_temp]
+    fila_hum = df_reglas[df_reglas["clave"] == clave_hum]
+    fila_ph = df_reglas[df_reglas["clave"] == clave_ph]
+    
+    st.subheader("Recomendaciones")
+    
+    if estado_temp != "CORRECTA" and not fila_temp.empty:
+        st.warning(
+            f"Temperatura: {fila_temp.iloc[0]['recomendacion']}"
+        )
+    
+    if estado_hum != "CORRECTA" and not fila_hum.empty:
+        st.warning(
+            f"Humedad: {fila_hum.iloc[0]['recomendacion']}"
+        )
+    
+    if estado_ph != "CORRECTO" and not fila_ph.empty:
+        st.warning(
+            f"pH: {fila_ph.iloc[0]['recomendacion']}"
+        )
+    
+    if estado_general == "OPERACION NORMAL":
+        st.success(
+            "Los parámetros evaluados se encuentran dentro de los rangos "
+            "esperados para la fase seleccionada."
+        )
