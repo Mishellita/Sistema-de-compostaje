@@ -1081,3 +1081,32 @@ elif menu == "Indicadores":
             "Material estructurante utilizado",
             f"{material_estructurante:.2f} ton"
         )
+    st.subheader("Stock disponible por lote")
+    
+    df_stock_lote = (
+        df_inv.groupby("codigo_lote")[
+            [
+                "compost_ingresado",
+                "salida_remediacion",
+                "salida_donacion"
+            ]
+        ]
+        .sum()
+        .reset_index()
+    )
+    
+    df_stock_lote["stock_disponible"] = (
+        df_stock_lote["compost_ingresado"]
+        - df_stock_lote["salida_remediacion"]
+        - df_stock_lote["salida_donacion"]
+    )
+    
+    df_stock_lote = df_stock_lote[
+        df_stock_lote["stock_disponible"] >= 0
+    ]
+    
+    st.bar_chart(
+        data=df_stock_lote,
+        x="codigo_lote",
+        y="stock_disponible"
+    )
