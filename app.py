@@ -457,3 +457,33 @@ elif menu == "Capacidad de lodo":
     else:
         recomendacion = "Regla no encontrada"
     st.info(f"Recomendación: {recomendacion}")
+
+elif menu == "Seguimiento":
+    st.header("Seguimiento del compostaje")
+
+    fecha_seg = st.date_input(
+        "Fecha de seguimiento",
+        key="fecha_seg"
+    )
+    
+    lote_seg = st.text_input(
+        "Código de lote",
+        key="lote_seg"
+    )
+    
+    fase_seg = st.selectbox(
+        "Fase del compostaje",
+        ["Mesofila I", "Termofila", "Mesofila II", "Maduracion"]
+    )
+    fila_fase = df_parametros[
+        df_parametros["fase"] == fase_seg
+    ].iloc[0]
+    
+    temp_min = fila_fase["temperatura_min"]
+    temp_max = fila_fase["temperatura_max"]
+    
+    hum_min_seg = fila_fase["humedad_min"]
+    hum_max_seg = fila_fase["humedad_max"]
+    
+    ph_min = fila_fase["ph_min"]
+    ph_max = fila_fase["ph_max"]
