@@ -8,3 +8,12 @@ Formulacion,Humedad inicial,CORRECTA,Aprobada,La humedad inicial es adecuada par
 Formulacion,Relacion C/N,BAJO,Reformular,"Incrementar materiales ricos en carbono, como aserrín, podas, etc",RELACION C/N|BAJO
 Formulacion,Relacion C/N,ALTO,Reformular,Incrementar materiales con mayor contenido de nitrogeno,RELACION C/N|ALTO
 Formulacion,Relacion C/N,CORRECTO,Aprobada,La relacion C/N es adecuada,RELACION C/N|CORRECTO
+Seguimiento,Temperatura,BAJA,Reformular,"Verificar humedad, mezcla y evolución de la actividad biológica.",TEMPERATURA|BAJA
+Seguimiento,Temperatura,ALTA,Reformular,"Realizar volteo y verificar aireación de la pila.",TEMPERATURA|ALTA
+Seguimiento,Temperatura,CORRECTA,Aprobada,"La temperatura se encuentra dentro del rango esperado.",TEMPERATURA|CORRECTA
+Seguimiento,pH,BAJO,Reformular,"Revisar composición de la mezcla y continuar el seguimiento del pH.",PH|BAJO
+Seguimiento,pH,ALTO,Reformular,"Revisar composición de la mezcla y posibles pérdidas de nitrógeno.",PH|ALTO
+Seguimiento,pH,CORRECTO,Aprobada,"El pH se encuentra dentro del rango esperado.",PH|CORRECTO
+Seguimiento,Humedad,BAJA,Reformular,"Adicionar agua durante el volteo hasta alcanzar el rango recomendado.",HUMEDAD|BAJA
+Seguimiento,Humedad,ALTA,Reformular,"Incrementar material seco y revisar aireación o drenaje.",HUMEDAD|ALTA
+Seguimiento,Humedad,CORRECTA,Aprobada,"La humedad se encuentra dentro del rango esperado.",HUMEDAD|CORRECTA
