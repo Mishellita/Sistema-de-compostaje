@@ -1110,3 +1110,21 @@ elif menu == "Indicadores":
         x="codigo_lote",
         y="stock_disponible"
     )
+    st.subheader("Estado de los seguimientos")
+    
+    df_estado_seg = pd.DataFrame({
+        "Estado": [
+            "Operación normal",
+            "Requiere ajuste"
+        ],
+        "Cantidad": [
+            int(operaciones_normales),
+            int(numero_alertas)
+        ]
+    })
+    
+    st.bar_chart(
+        data=df_estado_seg,
+        x="Estado",
+        y="Cantidad"
+    )
