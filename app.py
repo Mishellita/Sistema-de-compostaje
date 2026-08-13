@@ -445,33 +445,6 @@ elif menu == "Capacidad de lodo":
     st.header("Capacidad de lodo")
 
     st.write(
-        "Estima la cantidad máxima de lodo que puede incorporarse "
-        "según los criterios de relación C/N y humedad de la formulación inicial."
-    )
-    modo_capacidad = st.radio(
-        "Seleccione el tipo de cálculo",
-        [
-            "Calcular lodo máximo según materiales disponibles",
-            "Calcular ajuste para una cantidad de lodo a procesar"
-        ]
-    )
-    ro_cap = st.number_input(
-        "Residuos Orgánicos disponibles (ton)",
-        min_value=0.0,
-        value=0.0,
-        key="ro_cap"
-    )
-
-    rod_cap = st.number_input(
-        "Residuos Orgánicos Deshidratados disponibles (ton)",
-        min_value=0.0,
-        value=0.0,
-        key="…
-[14:14, 13/8/2026] Mishel Ruiz: elif menu == "Capacidad de lodo":
-
-    st.header("Capacidad de lodo")
-
-    st.write(
         "Este módulo permite estimar cuánto lodo puede incorporarse "
         "o qué ajuste necesita una mezcla cuando se desea procesar "
         "una cantidad específica de lodo."
