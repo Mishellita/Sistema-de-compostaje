@@ -1128,3 +1128,25 @@ elif menu == "Indicadores":
         x="Estado",
         y="Cantidad"
     )
+    st.subheader("Distribución de materiales valorizados")
+    
+    df_materiales = pd.DataFrame({
+        "Material": [
+            "Residuos orgánicos",
+            "Residuos orgánicos deshidratados",
+            "Lodo valorizado",
+            "Material estructurante"
+        ],
+        "Toneladas": [
+            df_form["ro"].sum(),
+            df_form["rod"].sum(),
+            df_form["ld"].sum(),
+            df_form["ca"].sum()
+        ]
+    })
+    
+    st.bar_chart(
+        data=df_materiales,
+        x="Material",
+        y="Toneladas"
+    )
