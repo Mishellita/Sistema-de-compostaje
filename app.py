@@ -34,10 +34,108 @@ menu = st.sidebar.radio(
 
 if menu == "Inicio":
 
+    st.title("🌱 SAFCO")
+    st.subheader("Sistema de Apoyo para Formulación y Control de Compostaje")
+
     st.info(
-        "Bienvenido al Sistema de Apoyo para Formulación de Compostaje"
+        "Seleccione un módulo desde el menú lateral para registrar información, "
+        "evaluar el proceso de compostaje o consultar indicadores."
     )
 
+    st.subheader("Resumen operativo")
+
+    df_inv_inicio = pd.read_csv("Inventario.csv")
+    df_seg_inicio = pd.read_csv("seguimiento.csv")
+    df_form_inicio = pd.read_csv("formulaciones.csv")
+
+    # Stock total
+    for columna in [
+        "compost_ingresado",
+        "salida_remediacion",
+        "salida_donacion"
+    ]:
+        df_inv_inicio[columna] = pd.to_numeric(
+            df_inv_inicio[columna],
+            errors="coerce"
+        ).fillna(0)
+
+    stock_inicio = (
+        df_inv_inicio["compost_ingresado"].sum()
+        - df_inv_inicio["salida_remediacion"].sum()
+        - df_inv_inicio["salida_donacion"].sum()
+    )
+
+    # Alertas
+    if not df_seg_inicio.empty:
+
+        df_seg_inicio["estado_general"] = (
+            df_seg_inicio["estado_general"]
+            .astype(str)
+            .str.strip()
+            .str.upper()
+        )
+
+        alertas_inicio = (
+            df_seg_inicio["estado_general"]
+            == "REQUIERE AJUSTE OPERATIVO"
+        ).sum()
+
+    else:
+        alertas_inicio = 0
+
+    # Lotes registrados
+    if not df_form_inicio.empty:
+
+        lotes_registrados = (
+            df_form_inicio["codigo_lote"]
+            .dropna()
+            .astype(str)
+            .nunique()
+        )
+
+    else:
+        lotes_registrados = 0
+
+    col1, col2, col3 = st.columns(3)
+
+    with col1:
+        st.metric(
+            "Lotes registrados",
+            lotes_registrados
+        )
+
+    with col2:
+        st.metric(
+            "Alertas activas",
+            int(alertas_inicio)
+        )
+
+    with col3:
+        st.metric(
+            "Stock disponible",
+            f"{stock_inicio:.2f} ton"
+        )
+
+    st.subheader("Módulos disponibles")
+
+    st.markdown(
+        """
+        *Nueva Formulación*  
+        Registra materiales y evalúa humedad y relación C/N.
+
+        *Capacidad de lodo*  
+        Estima cuánto lodo puede incorporarse según los criterios de formulación.
+
+        *Seguimiento*  
+        Registra temperatura, humedad, pH y genera recomendaciones.
+
+        *Inventario*  
+        Controla ingresos, salidas y stock disponible por lote.
+
+        *Indicadores*  
+        Consulta producción, valorización, alertas y gráficos del proceso.
+        """
+    )
 elif menu == "Nueva Formulación":
 
     st.header("Nueva Formulación")
