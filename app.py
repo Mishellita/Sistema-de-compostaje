@@ -114,25 +114,35 @@ if menu == "Inicio":
         )
 
     st.subheader("Módulos disponibles")
-
-    st.markdown(
-        """
-        *Nueva Formulación*  
-        Registra materiales y evalúa humedad y relación C/N.
-
-        *Capacidad de lodo*  
-        Estima cuánto lodo puede incorporarse según los criterios de formulación.
-
-        *Seguimiento*  
-        Registra temperatura, humedad, pH y genera recomendaciones.
-
-        *Inventario*  
-        Controla ingresos, salidas y stock disponible por lote.
-
-        *Indicadores*  
-        Consulta producción, valorización, alertas y gráficos del proceso.
-        """
-    )
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.info(
+            "🧪 NUEVA FORMULACIÓN\n\n"
+            "Registra materiales y evalúa humedad y relación C/N."
+        )
+    
+        st.info(
+            "🌡️ SEGUIMIENTO\n\n"
+            "Registra temperatura, humedad, pH y genera recomendaciones."
+        )
+    
+        st.info(
+            "📊 INDICADORES\n\n"
+            "Consulta producción, valorización, alertas y gráficos del proceso."
+        )
+    
+    with col2:
+        st.info(
+            "🧮 CAPACIDAD DE LODO\n\n"
+            "Estima cuánto lodo puede incorporarse según los criterios de formulación."
+        )
+    
+        st.info(
+            "📦 INVENTARIO\n\n"
+            "Controla ingresos, salidas y stock disponible por lote."
+        )
 elif menu == "Nueva Formulación":
 
     st.header("Nueva Formulación")
