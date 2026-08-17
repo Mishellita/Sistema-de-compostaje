@@ -160,25 +160,25 @@ elif menu == "Nueva Formulación":
     )
 
     ro = st.number_input(
-        "Residuos Orgánicos (ton)",
+        "Residuos Orgánicos añadidos (ton)",
         min_value=0.0,
         value=0.0
     )
 
     rod = st.number_input(
-        "Residuos Orgánicos Deshidratados (ton)",
+        "Residuos Orgánicos Deshidratados añadidos (ton)",
         min_value=0.0,
         value=0.0
     )
 
     ld = st.number_input(
-        "Lodo Deshidratado (ton)",
+        "Lodo Deshidratado añadido (ton)",
         min_value=0.0,
         value=0.0
     )
 
     ca = st.number_input(
-        "Cartón (ton)",
+        "Cartón / Material estructurante añadido (ton)",
         min_value=0.0,
         value=0.0
     )
@@ -186,256 +186,373 @@ elif menu == "Nueva Formulación":
     comentarios = st.text_area("Comentarios")
 
     if st.button("Calcular Formulación"):
-    
+
+        # =========================
+        # LEER HISTORIAL DEL LOTE
+        # =========================
+
+        df_form_hist = pd.read_csv("formulaciones.csv")
+
+        registros_lote = df_form_hist[
+            df_form_hist["codigo_lote"].astype(str)
+            == str(lote)
+        ]
+
+        if not registros_lote.empty:
+
+            ro_prev = pd.to_numeric(
+                registros_lote["ro_ingreso"],
+                errors="coerce"
+            ).fillna(0).sum()
+
+            rod_prev = pd.to_numeric(
+                registros_lote["rod_ingreso"],
+                errors="coerce"
+            ).fillna(0).sum()
+
+            ld_prev = pd.to_numeric(
+                registros_lote["ld_ingreso"],
+                errors="coerce"
+            ).fillna(0).sum()
+
+            ca_prev = pd.to_numeric(
+                registros_lote["ca_ingreso"],
+                errors="coerce"
+            ).fillna(0).sum()
+
+        else:
+
+            ro_prev = 0
+            rod_prev = 0
+            ld_prev = 0
+            ca_prev = 0
+
+        # =========================
+        # ACUMULADO DEL LOTE
+        # =========================
+
+        ro_acumulado = ro_prev + ro
+        rod_acumulado = rod_prev + rod
+        ld_acumulado = ld_prev + ld
+        ca_acumulado = ca_prev + ca
+
         masas = {
-            "RO": ro,
-            "ROD": rod,
-            "LD": ld,
-            "CA": ca
+            "RO": ro_acumulado,
+            "ROD": rod_acumulado,
+            "LD": ld_acumulado,
+            "CA": ca_acumulado
         }
-    
+
         masa_total = sum(masas.values())
-    
+
         agua_total = 0
         masa_seca_total = 0
         carbono_total = 0
         nitrogeno_total = 0
-    
+
         for material, masa in masas.items():
-    
+
             humedad = insumos[material]["humedad"]
-    
-            masa_seca = masa * (1 - humedad / 100)
-    
+
+            masa_seca = masa * (
+                1 - humedad / 100
+            )
+
             agua = masa - masa_seca
-    
+
             carbono = (
                 masa_seca
                 * insumos[material]["c"]
                 / 100
             )
-    
+
             nitrogeno = (
                 masa_seca
                 * insumos[material]["n"]
                 / 100
             )
-    
+
             agua_total += agua
             masa_seca_total += masa_seca
             carbono_total += carbono
             nitrogeno_total += nitrogeno
-    
+
         if masa_total > 0:
-    
+
             humedad_mezcla = (
                 agua_total / masa_total
             ) * 100
-    
-            if masa_seca_total > 0:
-    
-                carbono_pct = (
-                    carbono_total
-                    / masa_seca_total
-                ) * 100
-    
-                nitrogeno_pct = (
-                    nitrogeno_total
-                    / masa_seca_total
-                ) * 100
-    
-            else:
-    
-                carbono_pct = 0
-                nitrogeno_pct = 0
-    
+
             if nitrogeno_total > 0:
-    
                 relacion_cn = (
                     carbono_total
                     / nitrogeno_total
                 )
-    
             else:
-    
                 relacion_cn = 0
-    
+
             fila_mesofila = df_parametros[
-                df_parametros["fase"] == "Mesofila I"
+                df_parametros["fase"]
+                == "Mesofila I"
             ].iloc[0]
-    
-            hum_min = fila_mesofila["humedad_min"]
-            hum_max = fila_mesofila["humedad_max"]
-            cn_min = fila_mesofila["cn_min"]
-            cn_max = fila_mesofila["cn_max"]
-    
+
+            hum_min = fila_mesofila[
+                "humedad_min"
+            ]
+
+            hum_max = fila_mesofila[
+                "humedad_max"
+            ]
+
+            cn_min = fila_mesofila[
+                "cn_min"
+            ]
+
+            cn_max = fila_mesofila[
+                "cn_max"
+            ]
+
+            # =========================
+            # ESTADOS
+            # =========================
+
             if humedad_mezcla < hum_min:
                 estado_humedad = "BAJA"
-    
+
             elif humedad_mezcla > hum_max:
                 estado_humedad = "ALTA"
-    
+
             else:
                 estado_humedad = "CORRECTA"
-    
+
             if relacion_cn < cn_min:
                 estado_cn = "BAJO"
-    
+
             elif relacion_cn > cn_max:
                 estado_cn = "ALTO"
-    
+
             else:
                 estado_cn = "CORRECTO"
-    
+
             if (
                 estado_humedad == "CORRECTA"
                 and estado_cn == "CORRECTO"
             ):
                 estado_formulacion = "APROBADA"
-    
+
             else:
                 estado_formulacion = "REFORMULAR"
-    
+
             # =========================
             # REGISTRO HISTÓRICO
             # =========================
-    
+
             nueva_formulacion = pd.DataFrame([{
                 "fecha": fecha,
                 "operador": operador,
                 "codigo_lote": lote,
-                "ro": ro,
-                "rod": rod,
-                "ld": ld,
-                "ca": ca,
-                "masa_total": masa_total,
+
+                "ro_ingreso": ro,
+                "rod_ingreso": rod,
+                "ld_ingreso": ld,
+                "ca_ingreso": ca,
+
+                "ro_acumulado": ro_acumulado,
+                "rod_acumulado": rod_acumulado,
+                "ld_acumulado": ld_acumulado,
+                "ca_acumulado": ca_acumulado,
+
+                "masa_acumulada": masa_total,
                 "humedad_inicial": humedad_mezcla,
                 "relacion_cn": relacion_cn,
                 "estado_formulacion": estado_formulacion
             }])
-    
+
             nueva_formulacion.to_csv(
                 "formulaciones.csv",
                 mode="a",
                 header=False,
                 index=False
             )
-    
+
             st.success(
-                "Formulación calculada y registrada correctamente"
+                "Ingreso registrado y formulación acumulada calculada correctamente"
             )
-    
+
             # =========================
             # RESULTADOS
             # =========================
-    
+
+            st.caption(
+                f"El cálculo corresponde al acumulado del lote {lote}."
+            )
+
             col1, col2, col3 = st.columns(3)
-    
+
             with col1:
                 st.metric(
-                    "Masa Total",
+                    "Masa acumulada del lote",
                     f"{masa_total:.2f} ton"
                 )
-    
+
             with col2:
                 st.metric(
-                    "Humedad Inicial",
+                    "Humedad acumulada",
                     f"{humedad_mezcla:.2f}%"
                 )
-    
+
             with col3:
                 st.metric(
-                    "Relación C/N",
+                    "Relación C/N acumulada",
                     f"{relacion_cn:.2f}"
                 )
-    
+
+            st.subheader(
+                "Composición acumulada del lote"
+            )
+
+            col4, col5, col6, col7 = (
+                st.columns(4)
+            )
+
+            with col4:
+                st.metric(
+                    "RO acumulado",
+                    f"{ro_acumulado:.2f} ton"
+                )
+
+            with col5:
+                st.metric(
+                    "ROD acumulado",
+                    f"{rod_acumulado:.2f} ton"
+                )
+
+            with col6:
+                st.metric(
+                    "Lodo acumulado",
+                    f"{ld_acumulado:.2f} ton"
+                )
+
+            with col7:
+                st.metric(
+                    "Estructurante acumulado",
+                    f"{ca_acumulado:.2f} ton"
+                )
+
+            # =========================
+            # EVALUACIÓN
+            # =========================
+
             st.subheader("Evaluación")
-    
+
             st.write(
                 f"Estado Humedad: {estado_humedad}"
             )
-    
+
             st.write(
                 f"Estado Relación C/N: {estado_cn}"
             )
-    
+
             st.write(
                 f"Estado Formulación: {estado_formulacion}"
             )
-    
+
             # =========================
             # RECOMENDACIONES
             # =========================
-    
+
             clave_humedad = (
-                f"HUMEDAD INICIAL|{estado_humedad}"
+                f"HUMEDAD INICIAL|"
+                f"{estado_humedad}"
             )
-    
+
             fila_humedad = df_reglas[
-                df_reglas["clave"] == clave_humedad
+                df_reglas["clave"]
+                == clave_humedad
             ]
-    
+
             clave_cn = (
-                f"RELACION C/N|{estado_cn}"
+                f"RELACION C/N|"
+                f"{estado_cn}"
             )
-    
+
             fila_cn = df_reglas[
-                df_reglas["clave"] == clave_cn
+                df_reglas["clave"]
+                == clave_cn
             ]
-    
+
             if not fila_humedad.empty:
                 st.info(
-                    f"Recomendación humedad: "
+                    "Recomendación humedad: "
                     f"{fila_humedad.iloc[0]['recomendacion']}"
                 )
-    
+
             if not fila_cn.empty:
                 st.info(
-                    f"Recomendación C/N: "
+                    "Recomendación C/N: "
                     f"{fila_cn.iloc[0]['recomendacion']}"
                 )
-    
+
         else:
-    
+
             st.warning(
                 "Ingrese al menos una cantidad de material "
                 "para realizar la formulación."
             )
 
-    st.subheader("Historial de formulaciones")
-    
-    df_form_hist = pd.read_csv("formulaciones.csv")
-    
+    # =========================
+    # HISTORIAL
+    # =========================
+
+    st.subheader(
+        "Historial de formulaciones"
+    )
+
+    df_form_hist = pd.read_csv(
+        "formulaciones.csv"
+    )
+
     if not df_form_hist.empty:
-    
+
         lotes_disponibles = sorted(
-            df_form_hist["codigo_lote"]
+            df_form_hist[
+                "codigo_lote"
+            ]
             .dropna()
             .astype(str)
             .unique()
         )
-    
+
         lote_filtro = st.selectbox(
             "Seleccionar código de lote",
             ["Todos"] + lotes_disponibles,
             key="filtro_lote_formulacion"
         )
-    
+
         if lote_filtro == "Todos":
-            df_form_filtrado = df_form_hist
+
+            df_form_filtrado = (
+                df_form_hist
+            )
+
         else:
-            df_form_filtrado = df_form_hist[
-                df_form_hist["codigo_lote"].astype(str)
-                == lote_filtro
-            ]
-    
+
+            df_form_filtrado = (
+                df_form_hist[
+                    df_form_hist[
+                        "codigo_lote"
+                    ].astype(str)
+                    == lote_filtro
+                ]
+            )
+
         st.dataframe(
             df_form_filtrado,
             use_container_width=True
         )
-    
+
     else:
-    
+
         st.info(
             "Aún no existen formulaciones registradas."
         )
