@@ -1,1 +1,1 @@
-fecha,operador,codigo_lote,ro,rod,ld,ca,masa_total,humedad_inicial,relacion_cn,estado_formulacion
+fecha,operador,codigo_lote,ro_ingreso,rod_ingreso,ld_ingreso,ca_ingreso,ro_acumulado,rod_acumulado,ld_acumulado,ca_acumulado,masa_acumulada,humedad_inicial,relacion_cn,estado_formulacion
