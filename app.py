@@ -557,7 +557,7 @@ elif menu == "Nueva Formulación":
             "Aún no existen formulaciones registradas."
         )
 
-[17:11, 20/8/2026] Mishel Ruiz: elif menu == "Capacidad de lodo":
+elif menu == "Capacidad de lodo":
 
     st.header("Capacidad de lodo")
 
