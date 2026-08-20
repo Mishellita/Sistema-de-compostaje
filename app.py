@@ -563,8 +563,8 @@ elif menu == "Capacidad de lodo":
 
     st.write(
         "Este módulo permite estimar cuánto lodo puede incorporarse "
-        "o qué ajuste necesita una mezcla cuando se desea procesar "
-        "una cantidad específica de lodo."
+        "según los materiales disponibles o qué ajuste necesita una "
+        "mezcla cuando se desea procesar una cantidad específica de lodo."
     )
 
     # =========================
@@ -593,7 +593,8 @@ elif menu == "Capacidad de lodo":
     )
 
     # ============================================================
-    # MODO 1: CALCULAR LODO MÁXIMO SEGÚN MATERIALES DISPONIBLES
+    # MODO 1
+    # CALCULAR LODO MÁXIMO SEGÚN MATERIALES DISPONIBLES
     # ============================================================
 
     if modo_capacidad == "Calcular lodo máximo según materiales disponibles":
@@ -615,39 +616,66 @@ elif menu == "Capacidad de lodo":
         )
 
         ca_cap = st.number_input(
-            "Cartón / Material estructurante disponible (ton)",
+            "Cartón disponible (ton)",
             min_value=0.0,
             value=0.0,
             key="ca_cap"
         )
 
+        as_cap = st.number_input(
+            "Aserrín disponible (ton)",
+            min_value=0.0,
+            value=0.0,
+            key="as_cap"
+        )
+
+        # =========================
+        # CARBONO SIN LODO
+        # =========================
+
         carbono_sin_lodo = (
             ro_cap
             * (1 - insumos["RO"]["humedad"] / 100)
             * insumos["RO"]["c"] / 100
-            +
-            rod_cap
+
+            + rod_cap
             * (1 - insumos["ROD"]["humedad"] / 100)
             * insumos["ROD"]["c"] / 100
-            +
-            ca_cap
+
+            + ca_cap
             * (1 - insumos["CA"]["humedad"] / 100)
             * insumos["CA"]["c"] / 100
+
+            + as_cap
+            * (1 - insumos["AS"]["humedad"] / 100)
+            * insumos["AS"]["c"] / 100
         )
+
+        # =========================
+        # NITRÓGENO SIN LODO
+        # =========================
 
         nitrogeno_sin_lodo = (
             ro_cap
             * (1 - insumos["RO"]["humedad"] / 100)
             * insumos["RO"]["n"] / 100
-            +
-            rod_cap
+
+            + rod_cap
             * (1 - insumos["ROD"]["humedad"] / 100)
             * insumos["ROD"]["n"] / 100
-            +
-            ca_cap
+
+            + ca_cap
             * (1 - insumos["CA"]["humedad"] / 100)
             * insumos["CA"]["n"] / 100
+
+            + as_cap
+            * (1 - insumos["AS"]["humedad"] / 100)
+            * insumos["AS"]["n"] / 100
         )
+
+        # =========================
+        # PROPIEDADES DEL LODO
+        # =========================
 
         carbono_por_ton_lodo = (
             (1 - insumos["LD"]["humedad"] / 100)
@@ -659,48 +687,80 @@ elif menu == "Capacidad de lodo":
             * insumos["LD"]["n"] / 100
         )
 
+        # =========================
+        # LÍMITE POR C/N
+        # =========================
+
         denominador_cn = (
             cn_min * nitrogeno_por_ton_lodo
             - carbono_por_ton_lodo
         )
 
-        if denominador_cn != 0:
+        if denominador_cn > 0:
+
             lodo_por_cn = (
                 carbono_sin_lodo
                 - cn_min * nitrogeno_sin_lodo
             ) / denominador_cn
+
         else:
             lodo_por_cn = 0
 
-        lodo_por_cn = max(0, lodo_por_cn)
+        lodo_por_cn = max(
+            0,
+            lodo_por_cn
+        )
+
+        # =========================
+        # AGUA Y MASA SIN LODO
+        # =========================
 
         agua_sin_lodo = (
-            ro_cap * insumos["RO"]["humedad"] / 100
-            + rod_cap * insumos["ROD"]["humedad"] / 100
-            + ca_cap * insumos["CA"]["humedad"] / 100
+            ro_cap
+            * insumos["RO"]["humedad"] / 100
+
+            + rod_cap
+            * insumos["ROD"]["humedad"] / 100
+
+            + ca_cap
+            * insumos["CA"]["humedad"] / 100
+
+            + as_cap
+            * insumos["AS"]["humedad"] / 100
         )
 
         masa_sin_lodo = (
             ro_cap
             + rod_cap
             + ca_cap
+            + as_cap
         )
 
         humedad_lodo = (
             insumos["LD"]["humedad"] / 100
         )
 
-        humedad_max = hum_max / 100
+        humedad_max_decimal = (
+            hum_max / 100
+        )
 
-        if humedad_lodo <= humedad_max:
+        # =========================
+        # LÍMITE POR HUMEDAD
+        # =========================
+
+        if humedad_lodo <= humedad_max_decimal:
+
             lodo_por_humedad = None
 
         else:
+
             lodo_por_humedad = (
-                humedad_max * masa_sin_lodo
+                humedad_max_decimal
+                * masa_sin_lodo
                 - agua_sin_lodo
             ) / (
-                humedad_lodo - humedad_max
+                humedad_lodo
+                - humedad_max_decimal
             )
 
             lodo_por_humedad = max(
@@ -708,41 +768,66 @@ elif menu == "Capacidad de lodo":
                 lodo_por_humedad
             )
 
+        # =========================
+        # LODO RECOMENDADO
+        # =========================
+
         if lodo_por_humedad is None:
-            lodo_recomendado = lodo_por_cn
+
+            lodo_recomendado = (
+                lodo_por_cn
+            )
+
         else:
+
             lodo_recomendado = min(
                 lodo_por_cn,
                 lodo_por_humedad
             )
 
-        st.subheader("Resultado del simulador")
+        # =========================
+        # RESULTADOS SIMULADOR
+        # =========================
+
+        st.subheader(
+            "Resultado del simulador"
+        )
 
         col1, col2, col3 = st.columns(3)
 
         with col1:
+
             st.metric(
                 "Lodo máximo por C/N",
                 f"{lodo_por_cn:.2f} ton"
             )
 
         with col2:
+
             if lodo_por_humedad is None:
+
                 st.metric(
                     "Límite por humedad",
                     "NO LIMITA"
                 )
+
             else:
+
                 st.metric(
                     "Lodo máximo por humedad",
                     f"{lodo_por_humedad:.2f} ton"
                 )
 
         with col3:
+
             st.metric(
                 "Lodo recomendado final",
                 f"{lodo_recomendado:.2f} ton"
             )
+
+        # =========================
+        # FORMULACIÓN RESULTANTE
+        # =========================
 
         masa_total_formulacion = (
             masa_sin_lodo
@@ -751,15 +836,19 @@ elif menu == "Capacidad de lodo":
 
         agua_total_formulacion = (
             agua_sin_lodo
-            + lodo_recomendado * humedad_lodo
+            + lodo_recomendado
+            * humedad_lodo
         )
 
         if masa_total_formulacion > 0:
+
             humedad_resultante = (
                 agua_total_formulacion
                 / masa_total_formulacion
             ) * 100
+
         else:
+
             humedad_resultante = 0
 
         carbono_final = (
@@ -775,34 +864,50 @@ elif menu == "Capacidad de lodo":
         )
 
         if nitrogeno_final > 0:
+
             cn_resultante = (
                 carbono_final
                 / nitrogeno_final
             )
+
         else:
+
             cn_resultante = 0
 
-        st.subheader("Resultados de la formulación")
+        # =========================
+        # RESULTADOS FORMULACIÓN
+        # =========================
+
+        st.subheader(
+            "Resultados de la formulación"
+        )
 
         col4, col5, col6 = st.columns(3)
 
         with col4:
+
             st.metric(
                 "Masa total de formulación",
                 f"{masa_total_formulacion:.2f} ton"
             )
 
         with col5:
+
             st.metric(
                 "Humedad resultante",
                 f"{humedad_resultante:.2f}%"
             )
 
         with col6:
+
             st.metric(
                 "Relación C/N resultante",
                 f"{cn_resultante:.2f}"
             )
+
+        # =========================
+        # EVALUACIÓN
+        # =========================
 
         cn_evaluado = round(
             cn_resultante,
@@ -819,15 +924,22 @@ elif menu == "Capacidad de lodo":
             or cn_evaluado > cn_max
             or humedad_evaluada > hum_max
         ):
-            estado_simulador = "NO ADMISIBLE"
+
+            estado_simulador = (
+                "NO ADMISIBLE"
+            )
 
         elif humedad_evaluada < hum_min:
+
             estado_simulador = (
                 "ADMISIBLE CON AJUSTE DE HUMEDAD"
             )
 
         else:
-            estado_simulador = "ADMISIBLE"
+
+            estado_simulador = (
+                "ADMISIBLE"
+            )
 
         st.subheader("Evaluación")
 
@@ -882,7 +994,8 @@ elif menu == "Capacidad de lodo":
         )
 
     # ============================================================
-    # MODO 2: AJUSTAR MEZCLA PARA PROCESAR UNA CANTIDAD DE LODO
+    # MODO 2
+    # AJUSTAR MEZCLA PARA PROCESAR UNA CANTIDAD DE LODO
     # ============================================================
 
     else:
@@ -892,10 +1005,10 @@ elif menu == "Capacidad de lodo":
         )
 
         st.write(
-            "Ingrese la cantidad de lodo que se desea procesar "
-            "y los materiales actualmente disponibles. SAFCO "
-            "estimará cuánto material estructurante adicional "
-            "se requiere para alcanzar el C/N mínimo."
+            "Ingrese la cantidad de lodo que desea procesar "
+            "y los materiales disponibles. SAFCO calculará "
+            "si la mezcla necesita aserrín adicional para "
+            "alcanzar el C/N mínimo establecido."
         )
 
         ro_obj = st.number_input(
@@ -913,10 +1026,17 @@ elif menu == "Capacidad de lodo":
         )
 
         ca_obj = st.number_input(
-            "Cartón / Material estructurante disponible (ton)",
+            "Cartón disponible (ton)",
             min_value=0.0,
             value=0.0,
             key="ca_obj"
+        )
+
+        as_obj = st.number_input(
+            "Aserrín disponible actualmente (ton)",
+            min_value=0.0,
+            value=0.0,
+            key="as_obj"
         )
 
         lodo_obj = st.number_input(
@@ -926,89 +1046,117 @@ elif menu == "Capacidad de lodo":
             key="lodo_obj"
         )
 
+        # =========================
+        # CARBONO BASE
+        # =========================
+
         carbono_base = (
             ro_obj
             * (1 - insumos["RO"]["humedad"] / 100)
             * insumos["RO"]["c"] / 100
-            +
-            rod_obj
+
+            + rod_obj
             * (1 - insumos["ROD"]["humedad"] / 100)
             * insumos["ROD"]["c"] / 100
-            +
-            ca_obj
+
+            + ca_obj
             * (1 - insumos["CA"]["humedad"] / 100)
             * insumos["CA"]["c"] / 100
-            +
-            lodo_obj
+
+            + as_obj
+            * (1 - insumos["AS"]["humedad"] / 100)
+            * insumos["AS"]["c"] / 100
+
+            + lodo_obj
             * (1 - insumos["LD"]["humedad"] / 100)
             * insumos["LD"]["c"] / 100
         )
+
+        # =========================
+        # NITRÓGENO BASE
+        # =========================
 
         nitrogeno_base = (
             ro_obj
             * (1 - insumos["RO"]["humedad"] / 100)
             * insumos["RO"]["n"] / 100
-            +
-            rod_obj
+
+            + rod_obj
             * (1 - insumos["ROD"]["humedad"] / 100)
             * insumos["ROD"]["n"] / 100
-            +
-            ca_obj
+
+            + ca_obj
             * (1 - insumos["CA"]["humedad"] / 100)
             * insumos["CA"]["n"] / 100
-            +
-            lodo_obj
+
+            + as_obj
+            * (1 - insumos["AS"]["humedad"] / 100)
+            * insumos["AS"]["n"] / 100
+
+            + lodo_obj
             * (1 - insumos["LD"]["humedad"] / 100)
             * insumos["LD"]["n"] / 100
         )
 
-        carbono_por_ton_carton = (
-            (1 - insumos["CA"]["humedad"] / 100)
-            * insumos["CA"]["c"] / 100
+        # =========================
+        # PROPIEDADES DEL ASERRÍN
+        # =========================
+
+        carbono_por_ton_aserrin = (
+            (1 - insumos["AS"]["humedad"] / 100)
+            * insumos["AS"]["c"] / 100
         )
 
-        nitrogeno_por_ton_carton = (
-            (1 - insumos["CA"]["humedad"] / 100)
-            * insumos["CA"]["n"] / 100
+        nitrogeno_por_ton_aserrin = (
+            (1 - insumos["AS"]["humedad"] / 100)
+            * insumos["AS"]["n"] / 100
         )
 
-        denominador_carton = (
-            carbono_por_ton_carton
+        # =========================
+        # ASERRÍN ADICIONAL
+        # =========================
+
+        denominador_aserrin = (
+            carbono_por_ton_aserrin
             - cn_min
-            * nitrogeno_por_ton_carton
+            * nitrogeno_por_ton_aserrin
         )
 
-        if denominador_carton > 0:
+        if denominador_aserrin > 0:
 
-            carton_adicional = (
+            aserrin_adicional = (
                 cn_min * nitrogeno_base
                 - carbono_base
-            ) / denominador_carton
+            ) / denominador_aserrin
 
         else:
 
-            carton_adicional = 0
+            aserrin_adicional = 0
 
-        carton_adicional = max(
+        aserrin_adicional = max(
             0,
-            carton_adicional
+            aserrin_adicional
         )
 
-        carton_total = (
-            ca_obj
-            + carton_adicional
+        aserrin_total = (
+            as_obj
+            + aserrin_adicional
         )
+
+        # =========================
+        # C/N FINAL
+        # =========================
 
         carbono_final_ajuste = (
             carbono_base
-            + carton_adicional
-            * carbono_por_ton_carton
+            + aserrin_adicional
+            * carbono_por_ton_aserrin
         )
 
         nitrogeno_final_ajuste = (
             nitrogeno_base
-            + carton_adicional
-            * nitrogeno_por_ton_carton
+            + aserrin_adicional
+            * nitrogeno_por_ton_aserrin
         )
 
         if nitrogeno_final_ajuste > 0:
@@ -1022,27 +1170,35 @@ elif menu == "Capacidad de lodo":
 
             cn_final_ajuste = 0
 
+        # =========================
+        # HUMEDAD FINAL
+        # =========================
+
         agua_total_ajuste = (
             ro_obj
             * insumos["RO"]["humedad"] / 100
-            +
-            rod_obj
+
+            + rod_obj
             * insumos["ROD"]["humedad"] / 100
-            +
-            ca_obj
+
+            + ca_obj
             * insumos["CA"]["humedad"] / 100
-            +
-            lodo_obj
+
+            + as_obj
+            * insumos["AS"]["humedad"] / 100
+
+            + lodo_obj
             * insumos["LD"]["humedad"] / 100
-            +
-            carton_adicional
-            * insumos["CA"]["humedad"] / 100
+
+            + aserrin_adicional
+            * insumos["AS"]["humedad"] / 100
         )
 
         masa_total_ajuste = (
             ro_obj
             + rod_obj
-            + carton_total
+            + ca_obj
+            + aserrin_total
             + lodo_obj
         )
 
@@ -1057,27 +1213,40 @@ elif menu == "Capacidad de lodo":
 
             humedad_final_ajuste = 0
 
-        st.subheader("Ajuste recomendado")
+        # =========================
+        # AJUSTE RECOMENDADO
+        # =========================
+
+        st.subheader(
+            "Ajuste recomendado"
+        )
 
         col1, col2, col3 = st.columns(3)
 
         with col1:
+
             st.metric(
-                "Material estructurante adicional",
-                f"{carton_adicional:.2f} ton"
+                "Aserrín adicional recomendado",
+                f"{aserrin_adicional:.2f} ton"
             )
 
         with col2:
+
             st.metric(
-                "Cartón / estructurante total",
-                f"{carton_total:.2f} ton"
+                "Aserrín total requerido",
+                f"{aserrin_total:.2f} ton"
             )
 
         with col3:
+
             st.metric(
                 "Masa total ajustada",
                 f"{masa_total_ajuste:.2f} ton"
             )
+
+        # =========================
+        # RESULTADO FINAL
+        # =========================
 
         st.subheader(
             "Resultado después del ajuste"
@@ -1086,16 +1255,22 @@ elif menu == "Capacidad de lodo":
         col4, col5 = st.columns(2)
 
         with col4:
+
             st.metric(
                 "Relación C/N resultante",
                 f"{cn_final_ajuste:.2f}"
             )
 
         with col5:
+
             st.metric(
                 "Humedad resultante",
                 f"{humedad_final_ajuste:.2f}%"
             )
+
+        # =========================
+        # EVALUACIÓN
+        # =========================
 
         if (
             cn_final_ajuste >= cn_min
@@ -1115,17 +1290,17 @@ elif menu == "Capacidad de lodo":
             elif humedad_final_ajuste < hum_min:
 
                 st.warning(
-                    "La mezcla cumple el criterio de C/N, "
-                    "pero requiere incrementar la humedad "
-                    "antes de conformar la pila."
+                    "La mezcla alcanza el C/N requerido, "
+                    "pero presenta humedad baja. Se requiere "
+                    "ajustar la humedad antes de conformar la pila."
                 )
 
             else:
 
                 st.warning(
-                    "La mezcla cumple el criterio de C/N, "
-                    "pero presenta humedad superior al "
-                    "rango recomendado."
+                    "La mezcla alcanza el C/N requerido, "
+                    "pero presenta humedad superior al rango "
+                    "recomendado."
                 )
 
         else:
