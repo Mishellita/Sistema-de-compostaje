@@ -632,13 +632,13 @@ elif menu == "Capacidad de lodo":
             key="as_cap"
         )
 
-        if as_cap > 0:
-    st.warning(
-        "Las propiedades del aserrín utilizadas en el cálculo "
-        "son valores referenciales. Se recomienda actualizar "
-        "humedad, carbono y nitrógeno con resultados de "
-        "caracterización del material utilizado en planta."
-    )
+            if as_cap > 0:
+        st.warning(
+            "Las propiedades del aserrín utilizadas en el cálculo "
+            "son valores referenciales. Se recomienda actualizar "
+            "humedad, carbono y nitrógeno con resultados de "
+            "caracterización del material utilizado en planta."
+        )
 
         masa_sin_lodo = (
             ro_cap
