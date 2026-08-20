@@ -557,31 +557,7 @@ elif menu == "Nueva Formulación":
             "Aún no existen formulaciones registradas."
         )
 
-elif menu == "Capacidad de lodo":
-
-    st.header("Capacidad de lodo")
-
-    st.write(
-        "Este módulo permite estimar cuánto lodo puede incorporarse "
-        "según los materiales disponibles o qué ajuste necesita una "
-        "mezcla cuando se desea procesar una cantidad específica de lodo."
-    )
-
-    # ============================================================
-    # PARÁMETROS MESÓFILA I
-    # ============================================================
-
-    fila_mesofila = df_parametros[
-        df_parametros["fase"] == "Mesofila I"
-    ].iloc[0]
-
-    hum_min = float(fila_mesofila["humedad_min"])
-    hum_max = float(fila_mesofila["humedad_max"])
-    cn_min = float(fila_mesofila["cn_min"])
-    cn_max = float(fila_mesofila["cn_max"])
-
-    # Objetiv…
-[17:13, 20/8/2026] Mishel Ruiz: elif menu == "Capacidad de lodo":
+ elif menu == "Capacidad de lodo":
 
     st.header("Capacidad de lodo")
 
