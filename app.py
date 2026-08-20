@@ -769,62 +769,156 @@ elif menu == "Capacidad de lodo":
             )
 
         # =========================
-        # LODO RECOMENDADO
+        # LÍMITES Y OBJETIVO OPERATIVO
         # =========================
-
-        if lodo_por_humedad is None:
-
-            lodo_recomendado = (
-                lodo_por_cn
+        
+        # Humedad objetivo para trabajar con margen
+        # dentro del rango admisible 50 - 60 %
+        hum_objetivo = 55.0
+        hum_objetivo_decimal = hum_objetivo / 100
+        
+        # Cantidad de lodo que llevaría la mezcla
+        # aproximadamente a la humedad objetivo
+        if humedad_lodo > hum_objetivo_decimal:
+        
+            lodo_por_humedad_objetivo = (
+                hum_objetivo_decimal * masa_sin_lodo
+                - agua_sin_lodo
+            ) / (
+                humedad_lodo
+                - hum_objetivo_decimal
             )
-
+        
+            lodo_por_humedad_objetivo = max(
+                0,
+                lodo_por_humedad_objetivo
+            )
+        
         else:
-
-            lodo_recomendado = min(
+            # El lodo no hace aumentar la humedad hasta el objetivo
+            lodo_por_humedad_objetivo = None
+        
+        
+        # =========================
+        # MÁXIMO TÉCNICAMENTE ADMISIBLE
+        # =========================
+        
+        if lodo_por_humedad is None:
+        
+            lodo_maximo_admisible = lodo_por_cn
+        
+        else:
+        
+            lodo_maximo_admisible = min(
                 lodo_por_cn,
                 lodo_por_humedad
             )
-
+        
+        
         # =========================
-        # RESULTADOS SIMULADOR
+        # RECOMENDACIÓN OPERATIVA
         # =========================
+        
+        if lodo_por_humedad_objetivo is None:
+        
+            lodo_recomendado = lodo_maximo_admisible
+        
+        else:
+        
+            lodo_recomendado = min(
+                lodo_por_cn,
+                lodo_por_humedad_objetivo
+            )
+        
+        
+        # =========================
+        # RESTRICCIÓN DOMINANTE
+        # =========================
+        
+        if lodo_por_humedad is None:
+        
+            restriccion_dominante = "C/N"
+        
+        elif lodo_por_cn < lodo_por_humedad:
+        
+            restriccion_dominante = "C/N"
+        
+        elif lodo_por_humedad < lodo_por_cn:
+        
+            restriccion_dominante = "HUMEDAD"
+        
+        else:
+        
+            restriccion_dominante = "C/N Y HUMEDAD"
 
-        st.subheader(
-            "Resultado del simulador"
-        )
+       st.subheader("Resultado del simulador")
 
         col1, col2, col3 = st.columns(3)
-
+        
         with col1:
-
             st.metric(
-                "Lodo máximo por C/N",
+                "Límite técnico por C/N",
                 f"{lodo_por_cn:.2f} ton"
             )
-
+        
         with col2:
-
             if lodo_por_humedad is None:
-
                 st.metric(
-                    "Límite por humedad",
+                    "Límite técnico por humedad",
                     "NO LIMITA"
                 )
-
             else:
-
                 st.metric(
-                    "Lodo máximo por humedad",
+                    "Límite técnico por humedad",
                     f"{lodo_por_humedad:.2f} ton"
                 )
-
+        
         with col3:
-
             st.metric(
-                "Lodo recomendado final",
+                "Máximo técnicamente admisible",
+                f"{lodo_maximo_admisible:.2f} ton"
+            )
+        
+        
+        st.subheader("Recomendación operativa")
+        
+        col_op1, col_op2, col_op3 = st.columns(3)
+        
+        with col_op1:
+            st.metric(
+                "Lodo recomendado",
                 f"{lodo_recomendado:.2f} ton"
             )
+        
+        with col_op2:
+            st.metric(
+                "Humedad objetivo",
+                f"{hum_objetivo:.0f}%"
+            )
+        
+        with col_op3:
+            st.metric(
+                "Restricción dominante",
+                restriccion_dominante
+            )
+            if lodo_recomendado < lodo_maximo_admisible:
 
+            st.info(
+                f"Aunque podrían incorporarse hasta "
+                f"{lodo_maximo_admisible:.2f} ton de lodo sin superar "
+                f"los límites técnicos establecidos, se recomienda "
+                f"trabajar con {lodo_recomendado:.2f} ton para mantener "
+                f"una humedad cercana al objetivo operativo de "
+                f"{hum_objetivo:.0f}%."
+            )
+        
+        else:
+        
+            st.info(
+                f"La cantidad recomendada está determinada por el criterio "
+                f"de {restriccion_dominante}. El valor calculado se mantiene "
+                f"dentro de los límites establecidos para la formulación inicial."
+            )
         # =========================
         # FORMULACIÓN RESULTANTE
         # =========================
