@@ -632,6 +632,14 @@ elif menu == "Capacidad de lodo":
             key="as_cap"
         )
 
+        if as_cap > 0:
+    st.warning(
+        "Las propiedades del aserrín utilizadas en el cálculo "
+        "son valores referenciales. Se recomienda actualizar "
+        "humedad, carbono y nitrógeno con resultados de "
+        "caracterización del material utilizado en planta."
+    )
+
         masa_sin_lodo = (
             ro_cap
             + rod_cap
@@ -1282,6 +1290,205 @@ elif menu == "Capacidad de lodo":
             nitrogeno_por_ton_aserrin = (
                 (1 - insumos["AS"]["humedad"] / 100)
                 * insumos["AS"]["n"] / 100
+            )
+            # ====================================================
+            # ASERRÍN ADICIONAL PARA ALCANZAR C/N MÍNIMO
+            # ====================================================
+
+            denominador_aserrin = (
+                carbono_por_ton_aserrin
+                - cn_min
+                * nitrogeno_por_ton_aserrin
+            )
+
+            if denominador_aserrin > 0:
+
+                aserrin_adicional = (
+                    cn_min * nitrogeno_base
+                    - carbono_base
+                ) / denominador_aserrin
+
+            else:
+
+                aserrin_adicional = 0
+
+            aserrin_adicional = max(
+                0,
+                aserrin_adicional
+            )
+
+            aserrin_total = (
+                as_obj
+                + aserrin_adicional
+            )
+
+            # ====================================================
+            # C/N FINAL
+            # ====================================================
+
+            carbono_final_ajuste = (
+                carbono_base
+                + aserrin_adicional
+                * carbono_por_ton_aserrin
+            )
+
+            nitrogeno_final_ajuste = (
+                nitrogeno_base
+                + aserrin_adicional
+                * nitrogeno_por_ton_aserrin
+            )
+
+            if nitrogeno_final_ajuste > 0:
+
+                cn_final_ajuste = (
+                    carbono_final_ajuste
+                    / nitrogeno_final_ajuste
+                )
+
+            else:
+
+                cn_final_ajuste = 0
+
+            # ====================================================
+            # HUMEDAD FINAL
+            # ====================================================
+
+            agua_total_ajuste = (
+                ro_obj
+                * insumos["RO"]["humedad"] / 100
+
+                + rod_obj
+                * insumos["ROD"]["humedad"] / 100
+
+                + ca_obj
+                * insumos["CA"]["humedad"] / 100
+
+                + as_obj
+                * insumos["AS"]["humedad"] / 100
+
+                + lodo_obj
+                * insumos["LD"]["humedad"] / 100
+
+                + aserrin_adicional
+                * insumos["AS"]["humedad"] / 100
+            )
+
+            masa_total_ajuste = (
+                ro_obj
+                + rod_obj
+                + ca_obj
+                + aserrin_total
+                + lodo_obj
+            )
+
+            humedad_final_ajuste = (
+                agua_total_ajuste
+                / masa_total_ajuste
+            ) * 100
+
+            # ====================================================
+            # AJUSTE RECOMENDADO
+            # ====================================================
+
+            st.subheader(
+                "Ajuste recomendado"
+            )
+
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+
+                st.metric(
+                    "Aserrín adicional recomendado",
+                    f"{aserrin_adicional:.2f} ton"
+                )
+
+            with col2:
+
+                st.metric(
+                    "Aserrín total requerido",
+                    f"{aserrin_total:.2f} ton"
+                )
+
+            with col3:
+
+                st.metric(
+                    "Masa total ajustada",
+                    f"{masa_total_ajuste:.2f} ton"
+                )
+
+            # ====================================================
+            # RESULTADO FINAL
+            # ====================================================
+
+            st.subheader(
+                "Resultado después del ajuste"
+            )
+
+            col4, col5 = st.columns(2)
+
+            with col4:
+
+                st.metric(
+                    "Relación C/N resultante",
+                    f"{cn_final_ajuste:.2f}"
+                )
+
+            with col5:
+
+                st.metric(
+                    "Humedad resultante",
+                    f"{humedad_final_ajuste:.2f}%"
+                )
+
+            # ====================================================
+            # EVALUACIÓN
+            # ====================================================
+
+            if (
+                cn_final_ajuste >= cn_min
+                and cn_final_ajuste <= cn_max
+            ):
+
+                if (
+                    humedad_final_ajuste >= hum_min
+                    and humedad_final_ajuste <= hum_max
+                ):
+
+                    st.success(
+                        "La mezcla ajustada cumple los criterios "
+                        "de C/N y humedad."
+                    )
+
+                elif humedad_final_ajuste < hum_min:
+
+                    st.warning(
+                        "La mezcla alcanza el C/N requerido, "
+                        "pero presenta humedad baja. Se requiere "
+                        "ajustar la humedad antes de conformar "
+                        "la pila."
+                    )
+
+                else:
+
+                    st.warning(
+                        "La mezcla alcanza el C/N requerido, "
+                        "pero presenta humedad superior al rango "
+                        "establecido."
+                    )
+
+            else:
+
+                st.error(
+                    "La mezcla aún no cumple el criterio de C/N. "
+                    "Revise la composición de los materiales."
+                )
+
+        else:
+
+            st.info(
+                "Ingrese materiales y la cantidad de lodo que "
+                "desea procesar para realizar el cálculo."
             )
 elif menu == "Seguimiento":
     st.header("Seguimiento del compostaje")
