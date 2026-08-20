@@ -744,7 +744,7 @@ elif menu == "Capacidad de lodo":
                 cn_base = 0
 
             # ====================================================
-            # LÍMITE TÉCNICO POR C/N
+            # LÍMITE TEÓRICO POR C/N
             # ====================================================
 
             denominador_cn = (
