@@ -851,34 +851,34 @@ elif menu == "Capacidad de lodo":
         
             restriccion_dominante = "C/N Y HUMEDAD"
 
-       st.subheader("Resultado del simulador")
+    st.subheader("Resultado del simulador")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric(
+            "Límite técnico por C/N",
+            f"{lodo_por_cn:.2f} ton"
+        )
+    
+    with col2:
+        if lodo_por_humedad is None:
+            st.metric(
+                "Límite técnico por humedad",
+                "NO LIMITA"
+            )
+        else:
+            st.metric(
+                "Límite técnico por humedad",
+                f"{lodo_por_humedad:.2f} ton"
+            )
+    
+    with col3:
+        st.metric(
+            "Máximo técnicamente admisible",
+            f"{lodo_maximo_admisible:.2f} ton"
+        )
 
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.metric(
-                "Límite técnico por C/N",
-                f"{lodo_por_cn:.2f} ton"
-            )
-        
-        with col2:
-            if lodo_por_humedad is None:
-                st.metric(
-                    "Límite técnico por humedad",
-                    "NO LIMITA"
-                )
-            else:
-                st.metric(
-                    "Límite técnico por humedad",
-                    f"{lodo_por_humedad:.2f} ton"
-                )
-        
-        with col3:
-            st.metric(
-                "Máximo técnicamente admisible",
-                f"{lodo_maximo_admisible:.2f} ton"
-            )
-        
         
         st.subheader("Recomendación operativa")
         
