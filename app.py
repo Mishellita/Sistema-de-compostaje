@@ -557,7 +557,7 @@ elif menu == "Nueva Formulación":
             "Aún no existen formulaciones registradas."
         )
 
-elif menu == "Capacidad de lodo":
+[17:11, 20/8/2026] Mishel Ruiz: elif menu == "Capacidad de lodo":
 
     st.header("Capacidad de lodo")
 
@@ -580,8 +580,33 @@ elif menu == "Capacidad de lodo":
     cn_min = float(fila_mesofila["cn_min"])
     cn_max = float(fila_mesofila["cn_max"])
 
-    # Objetivo operativo dentro del rango técnico de humedad
+    # Objetiv…
+[17:13, 20/8/2026] Mishel Ruiz: elif menu == "Capacidad de lodo":
+
+    st.header("Capacidad de lodo")
+
+    st.write(
+        "Este módulo permite estimar cuánto lodo puede incorporarse "
+        "según los materiales disponibles o qué ajuste necesita una "
+        "mezcla cuando se desea procesar una cantidad específica de lodo."
+    )
+
+    # ============================================================
+    # PARÁMETROS MESÓFILA I
+    # ============================================================
+
+    fila_mesofila = df_parametros[
+        df_parametros["fase"] == "Mesofila I"
+    ].iloc[0]
+
+    hum_min = float(fila_mesofila["humedad_min"])
+    hum_max = float(fila_mesofila["humedad_max"])
+    cn_min = float(fila_mesofila["cn_min"])
+    cn_max = float(fila_mesofila["cn_max"])
+
+    # Objetivos operativos
     hum_objetivo = (hum_min + hum_max) / 2
+    cn_objetivo = (cn_min + cn_max) / 2
 
     # ============================================================
     # SELECCIÓN DEL MODO
@@ -632,6 +657,14 @@ elif menu == "Capacidad de lodo":
             key="as_cap"
         )
 
+        if as_cap > 0:
+            st.warning(
+                "Las propiedades del aserrín utilizadas en el cálculo "
+                "son valores referenciales. Se recomienda actualizar "
+                "humedad, carbono y nitrógeno cuando se disponga de "
+                "caracterización real del material utilizado en planta."
+            )
+
         masa_sin_lodo = (
             ro_cap
             + rod_cap
@@ -639,71 +672,63 @@ elif menu == "Capacidad de lodo":
             + as_cap
         )
 
-        # --------------------------------------------------------
-        # CARBONO DE LA MEZCLA BASE
-        # --------------------------------------------------------
+        # ========================================================
+        # CARBONO, NITRÓGENO Y AGUA DE LA MEZCLA BASE
+        # ========================================================
 
         carbono_sin_lodo = (
             ro_cap
             * (1 - insumos["RO"]["humedad"] / 100)
             * insumos["RO"]["c"] / 100
-
-            + rod_cap
+            +
+            rod_cap
             * (1 - insumos["ROD"]["humedad"] / 100)
             * insumos["ROD"]["c"] / 100
-
-            + ca_cap
+            +
+            ca_cap
             * (1 - insumos["CA"]["humedad"] / 100)
             * insumos["CA"]["c"] / 100
-
-            + as_cap
+            +
+            as_cap
             * (1 - insumos["AS"]["humedad"] / 100)
             * insumos["AS"]["c"] / 100
         )
-
-        # --------------------------------------------------------
-        # NITRÓGENO DE LA MEZCLA BASE
-        # --------------------------------------------------------
 
         nitrogeno_sin_lodo = (
             ro_cap
             * (1 - insumos["RO"]["humedad"] / 100)
             * insumos["RO"]["n"] / 100
-
-            + rod_cap
+            +
+            rod_cap
             * (1 - insumos["ROD"]["humedad"] / 100)
             * insumos["ROD"]["n"] / 100
-
-            + ca_cap
+            +
+            ca_cap
             * (1 - insumos["CA"]["humedad"] / 100)
             * insumos["CA"]["n"] / 100
-
-            + as_cap
+            +
+            as_cap
             * (1 - insumos["AS"]["humedad"] / 100)
             * insumos["AS"]["n"] / 100
         )
 
-        # --------------------------------------------------------
-        # AGUA DE LA MEZCLA BASE
-        # --------------------------------------------------------
-
         agua_sin_lodo = (
             ro_cap
             * insumos["RO"]["humedad"] / 100
-
-            + rod_cap
+            +
+            rod_cap
             * insumos["ROD"]["humedad"] / 100
-
-            + ca_cap
+            +
+            ca_cap
             * insumos["CA"]["humedad"] / 100
-
-            + as_cap
+            +
+            as_cap
             * insumos["AS"]["humedad"] / 100
         )
 
-        # --------------------------------------------------------
+        # ========================================================
         # PROPIEDADES DEL LODO
-        # --------------------------------------------------------
+        # ========================================================
 
         humedad_lodo = (
             insumos["LD"]["humedad"] / 100
@@ -719,15 +744,36 @@ elif menu == "Capacidad de lodo":
             * insumos["LD"]["n"] / 100
         )
 
-        # Solo calcular cuando existen materiales base
+        # ========================================================
+        # SOLO CALCULAR SI EXISTE MEZCLA BASE
+        # ========================================================
+
         if masa_sin_lodo > 0:
+
+            # ----------------------------------------------------
+            # ESTADO DE LA MEZCLA SIN LODO
+            # ----------------------------------------------------
+
+            humedad_base = (
+                agua_sin_lodo
+                / masa_sin_lodo
+            ) * 100
+
+            if nitrogeno_sin_lodo > 0:
+                cn_base = (
+                    carbono_sin_lodo
+                    / nitrogeno_sin_lodo
+                )
+            else:
+                cn_base = 0
 
             # ====================================================
             # LÍMITE TÉCNICO POR C/N
             # ====================================================
 
             denominador_cn = (
-                cn_min * nitrogeno_por_ton_lodo
+                cn_min
+                * nitrogeno_por_ton_lodo
                 - carbono_por_ton_lodo
             )
 
@@ -735,7 +781,8 @@ elif menu == "Capacidad de lodo":
 
                 lodo_por_cn = (
                     carbono_sin_lodo
-                    - cn_min * nitrogeno_sin_lodo
+                    - cn_min
+                    * nitrogeno_sin_lodo
                 ) / denominador_cn
 
                 lodo_por_cn = max(
@@ -745,20 +792,21 @@ elif menu == "Capacidad de lodo":
 
             else:
 
-                # Si agregar lodo no reduce la relación C/N
-                # hacia el límite mínimo, este criterio no limita.
                 lodo_por_cn = None
 
             # ====================================================
             # LÍMITE TÉCNICO POR HUMEDAD MÁXIMA
             # ====================================================
 
-            humedad_max_decimal = hum_max / 100
+            humedad_max_decimal = (
+                hum_max / 100
+            )
 
             if humedad_lodo > humedad_max_decimal:
 
                 lodo_por_humedad = (
-                    humedad_max_decimal * masa_sin_lodo
+                    humedad_max_decimal
+                    * masa_sin_lodo
                     - agua_sin_lodo
                 ) / (
                     humedad_lodo
@@ -785,7 +833,8 @@ elif menu == "Capacidad de lodo":
             if humedad_lodo > hum_objetivo_decimal:
 
                 lodo_por_humedad_objetivo = (
-                    hum_objetivo_decimal * masa_sin_lodo
+                    hum_objetivo_decimal
+                    * masa_sin_lodo
                     - agua_sin_lodo
                 ) / (
                     humedad_lodo
@@ -808,10 +857,14 @@ elif menu == "Capacidad de lodo":
             limites_tecnicos = []
 
             if lodo_por_cn is not None:
-                limites_tecnicos.append(lodo_por_cn)
+                limites_tecnicos.append(
+                    lodo_por_cn
+                )
 
             if lodo_por_humedad is not None:
-                limites_tecnicos.append(lodo_por_humedad)
+                limites_tecnicos.append(
+                    lodo_por_humedad
+                )
 
             if limites_tecnicos:
 
@@ -839,7 +892,9 @@ elif menu == "Capacidad de lodo":
                     restriccion_dominante = "HUMEDAD"
 
                 else:
-                    restriccion_dominante = "C/N Y HUMEDAD"
+                    restriccion_dominante = (
+                        "C/N Y HUMEDAD"
+                    )
 
             elif lodo_por_cn is not None:
 
@@ -851,7 +906,9 @@ elif menu == "Capacidad de lodo":
 
             else:
 
-                restriccion_dominante = "SIN LÍMITE CALCULABLE"
+                restriccion_dominante = (
+                    "SIN LÍMITE CALCULABLE"
+                )
 
             # ====================================================
             # RECOMENDACIÓN OPERATIVA
@@ -874,86 +931,191 @@ elif menu == "Capacidad de lodo":
                 )
 
             # ====================================================
-            # RESULTADOS DEL SIMULADOR
+            # FUNCIÓN PARA EVALUAR ESCENARIOS
+            # ====================================================
+
+            def evaluar_lodo(cantidad_lodo):
+
+                masa_escenario = (
+                    masa_sin_lodo
+                    + cantidad_lodo
+                )
+
+                agua_escenario = (
+                    agua_sin_lodo
+                    + cantidad_lodo
+                    * humedad_lodo
+                )
+
+                if masa_escenario > 0:
+
+                    humedad_escenario = (
+                        agua_escenario
+                        / masa_escenario
+                    ) * 100
+
+                else:
+
+                    humedad_escenario = 0
+
+                carbono_escenario = (
+                    carbono_sin_lodo
+                    + cantidad_lodo
+                    * carbono_por_ton_lodo
+                )
+
+                nitrogeno_escenario = (
+                    nitrogeno_sin_lodo
+                    + cantidad_lodo
+                    * nitrogeno_por_ton_lodo
+                )
+
+                if nitrogeno_escenario > 0:
+
+                    cn_escenario = (
+                        carbono_escenario
+                        / nitrogeno_escenario
+                    )
+
+                else:
+
+                    cn_escenario = 0
+
+                return (
+                    masa_escenario,
+                    humedad_escenario,
+                    cn_escenario
+                )
+
+            # ====================================================
+            # ESCENARIO RECOMENDADO
+            # ====================================================
+
+            (
+                masa_recomendada,
+                humedad_recomendada,
+                cn_recomendado
+            ) = evaluar_lodo(
+                lodo_recomendado
+            )
+
+            # ====================================================
+            # ESCENARIO MÁXIMO TÉCNICO
+            # ====================================================
+
+            (
+                masa_maxima,
+                humedad_maxima_escenario,
+                cn_maximo_escenario
+            ) = evaluar_lodo(
+                lodo_maximo_admisible
+            )
+
+            # ====================================================
+            # RECOMENDACIÓN PARA OPERACIÓN
             # ====================================================
 
             st.subheader(
-                "Límites técnicos"
+                "Recomendación para operación"
             )
 
             col1, col2, col3 = st.columns(3)
 
             with col1:
-
-                if lodo_por_cn is None:
-
-                    st.metric(
-                        "Límite técnico por C/N",
-                        "NO LIMITA"
-                    )
-
-                else:
-
-                    st.metric(
-                        "Límite técnico por C/N",
-                        f"{lodo_por_cn:.2f} ton"
-                    )
-
-            with col2:
-
-                if lodo_por_humedad is None:
-
-                    st.metric(
-                        "Límite técnico por humedad",
-                        "NO LIMITA"
-                    )
-
-                else:
-
-                    st.metric(
-                        "Límite técnico por humedad",
-                        f"{lodo_por_humedad:.2f} ton"
-                    )
-
-            with col3:
-
-                st.metric(
-                    "Máximo técnicamente admisible",
-                    f"{lodo_maximo_admisible:.2f} ton"
-                )
-
-            # ====================================================
-            # RECOMENDACIÓN OPERATIVA
-            # ====================================================
-
-            st.subheader(
-                "Recomendación operativa"
-            )
-
-            col_op1, col_op2, col_op3 = (
-                st.columns(3)
-            )
-
-            with col_op1:
-
                 st.metric(
                     "Lodo recomendado",
                     f"{lodo_recomendado:.2f} ton"
                 )
 
-            with col_op2:
-
+            with col2:
                 st.metric(
-                    "Humedad objetivo",
-                    f"{hum_objetivo:.1f}%"
+                    "Humedad esperada",
+                    f"{humedad_recomendada:.2f}%"
                 )
 
-            with col_op3:
-
+            with col3:
                 st.metric(
-                    "Restricción dominante",
-                    restriccion_dominante
+                    "Relación C/N estimada",
+                    f"{cn_recomendado:.2f}"
                 )
+
+            st.caption(
+                f"Rango técnico de humedad: "
+                f"{hum_min:.0f}% - {hum_max:.0f}% | "
+                f"Objetivo operativo: "
+                f"{hum_objetivo:.1f}%"
+            )
+
+            st.caption(
+                f"Rango técnico C/N: "
+                f"{cn_min:.1f} - {cn_max:.1f} | "
+                f"Referencia central: "
+                f"{cn_objetivo:.1f}"
+            )
+
+            # ====================================================
+            # SEMÁFORO OPERATIVO
+            # ====================================================
+
+            cumple_humedad = (
+                humedad_recomendada >= hum_min
+                and humedad_recomendada <= hum_max
+            )
+
+            cumple_cn = (
+                cn_recomendado >= cn_min
+                and cn_recomendado <= cn_max
+            )
+
+            if cumple_humedad and cumple_cn:
+
+                cerca_objetivo_hum = (
+                    abs(
+                        humedad_recomendada
+                        - hum_objetivo
+                    ) <= 2
+                )
+
+                cerca_objetivo_cn = (
+                    abs(
+                        cn_recomendado
+                        - cn_objetivo
+                    ) <= 2.5
+                )
+
+                if (
+                    cerca_objetivo_hum
+                    and cerca_objetivo_cn
+                ):
+
+                    st.success(
+                        "🟢 CONDICIÓN RECOMENDADA: "
+                        "la formulación se encuentra dentro "
+                        "de los rangos y con margen operativo "
+                        "adecuado."
+                    )
+
+                else:
+
+                    st.warning(
+                        "🟡 CONDICIÓN ADMISIBLE: "
+                        "la formulación cumple los límites "
+                        "técnicos, pero alguno de los parámetros "
+                        "se encuentra alejado del objetivo "
+                        "operativo o cercano a un límite."
+                    )
+
+            else:
+
+                st.error(
+                    "🔴 CONDICIÓN NO RECOMENDADA: "
+                    "uno o más parámetros se encuentran "
+                    "fuera de los límites técnicos."
+                )
+
+            # ====================================================
+            # MENSAJE PARA EL OPERADOR
+            # ====================================================
 
             if (
                 lodo_recomendado
@@ -964,9 +1126,9 @@ elif menu == "Capacidad de lodo":
                     f"El máximo técnicamente admisible es "
                     f"{lodo_maximo_admisible:.2f} ton de lodo. "
                     f"Sin embargo, se recomienda incorporar "
-                    f"{lodo_recomendado:.2f} ton para trabajar "
-                    f"con una humedad cercana al objetivo "
-                    f"operativo de {hum_objetivo:.1f}%."
+                    f"{lodo_recomendado:.2f} ton para mantener "
+                    f"la humedad cercana al objetivo operativo "
+                    f"de {hum_objetivo:.1f}%."
                 )
 
             else:
@@ -978,133 +1140,130 @@ elif menu == "Capacidad de lodo":
                 )
 
             # ====================================================
-            # FORMULACIÓN CON EL LODO RECOMENDADO
-            # ====================================================
-
-            masa_total_formulacion = (
-                masa_sin_lodo
-                + lodo_recomendado
-            )
-
-            agua_total_formulacion = (
-                agua_sin_lodo
-                + lodo_recomendado
-                * humedad_lodo
-            )
-
-            if masa_total_formulacion > 0:
-
-                humedad_resultante = (
-                    agua_total_formulacion
-                    / masa_total_formulacion
-                ) * 100
-
-            else:
-
-                humedad_resultante = 0
-
-            carbono_final = (
-                carbono_sin_lodo
-                + lodo_recomendado
-                * carbono_por_ton_lodo
-            )
-
-            nitrogeno_final = (
-                nitrogeno_sin_lodo
-                + lodo_recomendado
-                * nitrogeno_por_ton_lodo
-            )
-
-            if nitrogeno_final > 0:
-
-                cn_resultante = (
-                    carbono_final
-                    / nitrogeno_final
-                )
-
-            else:
-
-                cn_resultante = 0
-
-            # ====================================================
-            # RESULTADOS DE LA FORMULACIÓN
+            # DETALLE TÉCNICO PARA SUPERVISIÓN
             # ====================================================
 
             st.subheader(
-                "Resultado con la cantidad recomendada"
+                "Detalle técnico de capacidad"
             )
 
             col4, col5, col6 = st.columns(3)
 
             with col4:
 
-                st.metric(
-                    "Masa total de formulación",
-                    f"{masa_total_formulacion:.2f} ton"
-                )
+                if lodo_por_cn is None:
+
+                    st.metric(
+                        "Límite por C/N",
+                        "NO LIMITA"
+                    )
+
+                else:
+
+                    st.metric(
+                        "Límite por C/N",
+                        f"{lodo_por_cn:.2f} ton"
+                    )
 
             with col5:
 
-                st.metric(
-                    "Humedad resultante",
-                    f"{humedad_resultante:.2f}%"
-                )
+                if lodo_por_humedad is None:
+
+                    st.metric(
+                        "Límite por humedad",
+                        "NO LIMITA"
+                    )
+
+                else:
+
+                    st.metric(
+                        "Límite por humedad",
+                        f"{lodo_por_humedad:.2f} ton"
+                    )
 
             with col6:
 
                 st.metric(
-                    "Relación C/N resultante",
-                    f"{cn_resultante:.2f}"
+                    "Máximo técnicamente admisible",
+                    f"{lodo_maximo_admisible:.2f} ton"
                 )
 
-            # ====================================================
-            # EVALUACIÓN
-            # ====================================================
-
-            cn_evaluado = round(
-                cn_resultante,
-                2
+            st.metric(
+                "Restricción dominante",
+                restriccion_dominante
             )
 
-            humedad_evaluada = round(
-                humedad_resultante,
-                2
+            # ====================================================
+            # COMPARACIÓN DE ESCENARIOS
+            # ====================================================
+
+            st.subheader(
+                "Comparación de escenarios"
+            )
+
+            df_escenarios = pd.DataFrame({
+                "Escenario": [
+                    "Mezcla sin lodo",
+                    "Recomendación SAFCO",
+                    "Máximo técnico"
+                ],
+                "Lodo (ton)": [
+                    0,
+                    lodo_recomendado,
+                    lodo_maximo_admisible
+                ],
+                "Masa total (ton)": [
+                    masa_sin_lodo,
+                    masa_recomendada,
+                    masa_maxima
+                ],
+                "Humedad (%)": [
+                    humedad_base,
+                    humedad_recomendada,
+                    humedad_maxima_escenario
+                ],
+                "Relación C/N estimada": [
+                    cn_base,
+                    cn_recomendado,
+                    cn_maximo_escenario
+                ]
+            })
+
+            st.dataframe(
+                df_escenarios,
+                use_container_width=True
+            )
+
+            # ====================================================
+            # EVALUACIÓN DE LA RECOMENDACIÓN
+            # ====================================================
+
+            st.subheader(
+                "Evaluación"
             )
 
             if (
-                cn_evaluado < cn_min
-                or cn_evaluado > cn_max
-                or humedad_evaluada > hum_max
+                humedad_recomendada >= hum_min
+                and humedad_recomendada <= hum_max
+                and cn_recomendado >= cn_min
+                and cn_recomendado <= cn_max
             ):
 
-                estado_simulador = (
-                    "NO ADMISIBLE"
-                )
-
-            elif humedad_evaluada < hum_min:
-
-                estado_simulador = (
-                    "ADMISIBLE CON AJUSTE DE HUMEDAD"
-                )
-
-            else:
-
-                estado_simulador = (
-                    "ADMISIBLE"
-                )
-
-            st.subheader("Evaluación")
-
-            if estado_simulador == "ADMISIBLE":
+                estado_simulador = "ADMISIBLE"
 
                 st.success(
                     "Resultado: ADMISIBLE"
                 )
 
             elif (
-                estado_simulador
-                == "ADMISIBLE CON AJUSTE DE HUMEDAD"
+                cn_recomendado >= cn_min
+                and cn_recomendado <= cn_max
+                and humedad_recomendada < hum_min
             ):
+
+                estado_simulador = (
+                    "ADMISIBLE CON AJUSTE DE HUMEDAD"
+                )
 
                 st.warning(
                     "Resultado: ADMISIBLE "
@@ -1112,6 +1271,10 @@ elif menu == "Capacidad de lodo":
                 )
 
             else:
+
+                estado_simulador = (
+                    "NO ADMISIBLE"
+                )
 
                 st.error(
                     "Resultado: NO ADMISIBLE"
@@ -1154,7 +1317,7 @@ elif menu == "Capacidad de lodo":
 
     # ============================================================
     # MODO 2
-    # AJUSTAR MEZCLA PARA UNA CANTIDAD ESPECÍFICA DE LODO
+    # AJUSTAR MEZCLA PARA PROCESAR UNA CANTIDAD DE LODO
     # ============================================================
 
     else:
@@ -1204,6 +1367,13 @@ elif menu == "Capacidad de lodo":
             value=0.0,
             key="lodo_obj"
         )
+
+        if as_obj > 0:
+            st.warning(
+                "Las propiedades del aserrín utilizadas en el cálculo "
+                "son valores referenciales. Se recomienda actualizar "
+                "estos valores cuando se disponga de una caracterización real."
+            )
 
         masa_base = (
             ro_obj
@@ -1260,9 +1430,6 @@ elif menu == "Capacidad de lodo":
 
                 + as_obj
                 * (1 - insumos["AS"]["humedad"] / 100)
-                * insumos["AS"]["c"] * 0
-                + as_obj
-                * (1 - insumos["AS"]["humedad"] / 100)
                 * insumos["AS"]["n"] / 100
 
                 + lodo_obj
@@ -1283,8 +1450,9 @@ elif menu == "Capacidad de lodo":
                 (1 - insumos["AS"]["humedad"] / 100)
                 * insumos["AS"]["n"] / 100
             )
+
             # ====================================================
-            # ASERRÍN ADICIONAL PARA ALCANZAR C/N MÍNIMO
+            # ASERRÍN ADICIONAL
             # ====================================================
 
             denominador_aserrin = (
@@ -1296,7 +1464,8 @@ elif menu == "Capacidad de lodo":
             if denominador_aserrin > 0:
 
                 aserrin_adicional = (
-                    cn_min * nitrogeno_base
+                    cn_min
+                    * nitrogeno_base
                     - carbono_base
                 ) / denominador_aserrin
 
@@ -1379,7 +1548,7 @@ elif menu == "Capacidad de lodo":
             ) * 100
 
             # ====================================================
-            # AJUSTE RECOMENDADO
+            # RESULTADOS DEL AJUSTE
             # ====================================================
 
             st.subheader(
@@ -1409,10 +1578,6 @@ elif menu == "Capacidad de lodo":
                     f"{masa_total_ajuste:.2f} ton"
                 )
 
-            # ====================================================
-            # RESULTADO FINAL
-            # ====================================================
-
             st.subheader(
                 "Resultado después del ajuste"
             )
@@ -1422,7 +1587,7 @@ elif menu == "Capacidad de lodo":
             with col4:
 
                 st.metric(
-                    "Relación C/N resultante",
+                    "Relación C/N estimada",
                     f"{cn_final_ajuste:.2f}"
                 )
 
@@ -1432,6 +1597,16 @@ elif menu == "Capacidad de lodo":
                     "Humedad resultante",
                     f"{humedad_final_ajuste:.2f}%"
                 )
+
+            st.caption(
+                f"Rango técnico de humedad: "
+                f"{hum_min:.0f}% - {hum_max:.0f}%"
+            )
+
+            st.caption(
+                f"Rango técnico C/N: "
+                f"{cn_min:.1f} - {cn_max:.1f}"
+            )
 
             # ====================================================
             # EVALUACIÓN
@@ -1448,14 +1623,14 @@ elif menu == "Capacidad de lodo":
                 ):
 
                     st.success(
-                        "La mezcla ajustada cumple los criterios "
-                        "de C/N y humedad."
+                        "🟢 La mezcla ajustada cumple los "
+                        "criterios de C/N y humedad."
                     )
 
                 elif humedad_final_ajuste < hum_min:
 
                     st.warning(
-                        "La mezcla alcanza el C/N requerido, "
+                        "🟡 La mezcla alcanza el C/N requerido, "
                         "pero presenta humedad baja. Se requiere "
                         "ajustar la humedad antes de conformar "
                         "la pila."
@@ -1464,7 +1639,7 @@ elif menu == "Capacidad de lodo":
                 else:
 
                     st.warning(
-                        "La mezcla alcanza el C/N requerido, "
+                        "🟡 La mezcla alcanza el C/N requerido, "
                         "pero presenta humedad superior al rango "
                         "establecido."
                     )
@@ -1472,8 +1647,9 @@ elif menu == "Capacidad de lodo":
             else:
 
                 st.error(
-                    "La mezcla aún no cumple el criterio de C/N. "
-                    "Revise la composición de los materiales."
+                    "🔴 La mezcla aún no cumple el criterio "
+                    "de C/N. Revise la composición de los "
+                    "materiales."
                 )
 
         else:
