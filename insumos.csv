@@ -1,5 +1,6 @@
-codigo,nombre,humedad,carbono,nitrogeno
-RO,Residuos orgánicos,80,48,3.2
-ROD,Residuos orgánicos deshidratados,15,48.3,3.26
-LD,Lodo deshidratado de PTAR,40,32,3.5
-CA,Cartón,0,45,0.11
+codigo,humedad,carbono,nitrogeno
+RO,90.19,52.82,9.534
+ROD,6.52,44.15,3.551
+LD,72.68,54.93,2.432
+CA,3.57,50.72,0.165
+AS,20.00,50.00,0.10
