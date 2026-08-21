@@ -2270,7 +2270,610 @@ elif menu == "Capacidad de lodo":
                 st.write(
                     f"Estado: *{estado_combinada}*"
                 )
+# ====================================================
+            # SELECCIÓN DE ALTERNATIVA Y REPORTE
+            # ====================================================
 
+            st.subheader(
+                "Selección de alternativa"
+            )
+
+            alternativa_seleccionada = st.selectbox(
+                "Seleccione la alternativa que se aplicará",
+                [
+                    "Solo aserrín",
+                    "Solo cartón",
+                    "Cartón + aserrín"
+                ],
+                key="alternativa_seleccionada_capacidad"
+            )
+
+            justificacion = st.text_area(
+                "Justificación / observación de la decisión",
+                placeholder=(
+                    "Ejemplo: Se selecciona la alternativa con aserrín "
+                    "porque mantiene la humedad y la relación C/N dentro "
+                    "de los rangos establecidos y existe disponibilidad "
+                    "para gestionar este material."
+                ),
+                key="justificacion_capacidad"
+            )
+
+            # ====================================================
+            # DATOS SEGÚN ALTERNATIVA SELECCIONADA
+            # ====================================================
+
+            if alternativa_seleccionada == "Solo aserrín":
+
+                estructurante_tipo = "Aserrín"
+
+                estructurante_cantidad = (
+                    aserrin_solo
+                )
+
+                estructurante_por_ton = (
+                    estructurante_por_ton_aserrin
+                )
+
+                humedad_reporte = (
+                    mezcla_solo_aserrin["humedad"]
+                )
+
+                cn_reporte = (
+                    mezcla_solo_aserrin["cn"]
+                )
+
+                masa_reporte = (
+                    mezcla_solo_aserrin["masa"]
+                )
+
+                estado_reporte = (
+                    estado_aserrin
+                )
+
+                detalle_estructurante = (
+                    f"Aserrín: {aserrin_solo:.2f} ton"
+                )
+
+            elif alternativa_seleccionada == "Solo cartón":
+
+                estructurante_tipo = "Cartón adicional"
+
+                estructurante_cantidad = (
+                    carton_adicional
+                )
+
+                estructurante_por_ton = (
+                    estructurante_por_ton_carton
+                )
+
+                humedad_reporte = (
+                    mezcla_solo_carton["humedad"]
+                )
+
+                cn_reporte = (
+                    mezcla_solo_carton["cn"]
+                )
+
+                masa_reporte = (
+                    mezcla_solo_carton["masa"]
+                )
+
+                estado_reporte = (
+                    estado_carton
+                )
+
+                detalle_estructurante = (
+                    f"Cartón adicional: "
+                    f"{carton_adicional:.2f} ton"
+                )
+
+            else:
+
+                estructurante_tipo = (
+                    "Cartón + aserrín"
+                )
+
+                estructurante_cantidad = (
+                    estructurante_total_combinado
+                )
+
+                estructurante_por_ton = (
+                    estructurante_por_ton_combinado
+                )
+
+                humedad_reporte = (
+                    mezcla_combinada["humedad"]
+                )
+
+                cn_reporte = (
+                    mezcla_combinada["cn"]
+                )
+
+                masa_reporte = (
+                    mezcla_combinada["masa"]
+                )
+
+                estado_reporte = (
+                    estado_combinada
+                )
+
+                detalle_estructurante = (
+                    f"Cartón adicional: "
+                    f"{carton_combinado:.2f} ton | "
+                    f"Aserrín: "
+                    f"{aserrin_combinado:.2f} ton"
+                )
+
+            # ====================================================
+            # RESUMEN DE LA ALTERNATIVA SELECCIONADA
+            # ====================================================
+
+            st.subheader(
+                "Resumen de la alternativa seleccionada"
+            )
+
+            col_sel1, col_sel2, col_sel3, col_sel4 = (
+                st.columns(4)
+            )
+
+            with col_sel1:
+
+                st.metric(
+                    "Estructurante requerido",
+                    f"{estructurante_cantidad:.2f} ton"
+                )
+
+            with col_sel2:
+
+                st.metric(
+                    "Estructurante / ton LD",
+                    f"{estructurante_por_ton:.2f}"
+                )
+
+            with col_sel3:
+
+                st.metric(
+                    "Humedad estimada",
+                    f"{humedad_reporte:.2f}%"
+                )
+
+            with col_sel4:
+
+                st.metric(
+                    "Relación C/N",
+                    f"{cn_reporte:.2f}"
+                )
+
+            st.write(
+                f"Estado técnico: *{estado_reporte}*"
+            )
+
+            # ====================================================
+            # FUNCIÓN PARA GENERAR PDF
+            # ====================================================
+
+            def generar_reporte_pdf():
+
+                pdf = FPDF()
+
+                pdf.add_page()
+
+                pdf.set_auto_page_break(
+                    auto=True,
+                    margin=15
+                )
+
+                # --------------------------------------------
+                # TÍTULO
+                # --------------------------------------------
+
+                pdf.set_font(
+                    "Helvetica",
+                    "B",
+                    16
+                )
+
+                pdf.cell(
+                    0,
+                    10,
+                    "SAFCO - Reporte de planificación de mezcla",
+                    ln=True,
+                    align="C"
+                )
+
+                pdf.ln(5)
+
+                pdf.set_font(
+                    "Helvetica",
+                    "",
+                    10
+                )
+
+                pdf.cell(
+                    0,
+                    7,
+                    f"Fecha de generación: "
+                    f"{datetime.now().strftime('%d/%m/%Y %H:%M')}",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    7,
+                    f"Periodo evaluado: "
+                    f"{periodo_planificacion}",
+                    ln=True
+                )
+
+                pdf.ln(5)
+
+                # --------------------------------------------
+                # MATERIALES INGRESADOS
+                # --------------------------------------------
+
+                pdf.set_font(
+                    "Helvetica",
+                    "B",
+                    12
+                )
+
+                pdf.cell(
+                    0,
+                    8,
+                    "1. Materiales ingresados",
+                    ln=True
+                )
+
+                pdf.set_font(
+                    "Helvetica",
+                    "",
+                    10
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Residuos organicos (RO): "
+                    f"{ro_obj:.2f} ton",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Residuos organicos deshidratados (ROD): "
+                    f"{rod_obj:.2f} ton",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Carton disponible: "
+                    f"{ca_obj:.2f} ton",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Lodo a procesar: "
+                    f"{lodo_obj:.2f} ton",
+                    ln=True
+                )
+
+                pdf.ln(5)
+
+                # --------------------------------------------
+                # REFERENCIA HISTÓRICA
+                # --------------------------------------------
+
+                pdf.set_font(
+                    "Helvetica",
+                    "B",
+                    12
+                )
+
+                pdf.cell(
+                    0,
+                    8,
+                    "2. Referencia historica 60/20/20",
+                    ln=True
+                )
+
+                pdf.set_font(
+                    "Helvetica",
+                    "",
+                    10
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"RO de referencia: "
+                    f"{ro_hist:.2f} ton",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Carton de referencia: "
+                    f"{ca_hist:.2f} ton",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Lodo de referencia: "
+                    f"{ld_hist:.2f} ton",
+                    ln=True
+                )
+
+                pdf.ln(5)
+
+                # --------------------------------------------
+                # ALTERNATIVA
+                # --------------------------------------------
+
+                pdf.set_font(
+                    "Helvetica",
+                    "B",
+                    12
+                )
+
+                pdf.cell(
+                    0,
+                    8,
+                    "3. Alternativa seleccionada",
+                    ln=True
+                )
+
+                pdf.set_font(
+                    "Helvetica",
+                    "",
+                    10
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Alternativa: "
+                    f"{alternativa_seleccionada}",
+                    ln=True
+                )
+
+                pdf.multi_cell(
+                    0,
+                    6,
+                    f"Material estructurante: "
+                    f"{detalle_estructurante}"
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Estructurante total: "
+                    f"{estructurante_cantidad:.2f} ton",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Estructurante por tonelada de lodo: "
+                    f"{estructurante_por_ton:.2f} ton/t LD",
+                    ln=True
+                )
+
+                pdf.ln(5)
+
+                # --------------------------------------------
+                # RESULTADOS
+                # --------------------------------------------
+
+                pdf.set_font(
+                    "Helvetica",
+                    "B",
+                    12
+                )
+
+                pdf.cell(
+                    0,
+                    8,
+                    "4. Resultado tecnico estimado",
+                    ln=True
+                )
+
+                pdf.set_font(
+                    "Helvetica",
+                    "",
+                    10
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Masa total estimada: "
+                    f"{masa_reporte:.2f} ton",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Humedad estimada: "
+                    f"{humedad_reporte:.2f} %",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Relacion C/N estimada: "
+                    f"{cn_reporte:.2f}",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Estado: "
+                    f"{estado_reporte}",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Rango humedad: "
+                    f"{hum_min:.0f} - {hum_max:.0f} %",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Objetivo de humedad: "
+                    f"{hum_objetivo:.1f} %",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Rango C/N: "
+                    f"{cn_min:.1f} - {cn_max:.1f}",
+                    ln=True
+                )
+
+                pdf.cell(
+                    0,
+                    6,
+                    f"Objetivo C/N: "
+                    f"{cn_objetivo:.1f}",
+                    ln=True
+                )
+
+                pdf.ln(5)
+
+                # --------------------------------------------
+                # JUSTIFICACIÓN
+                # --------------------------------------------
+
+                pdf.set_font(
+                    "Helvetica",
+                    "B",
+                    12
+                )
+
+                pdf.cell(
+                    0,
+                    8,
+                    "5. Justificacion de la decision",
+                    ln=True
+                )
+
+                pdf.set_font(
+                    "Helvetica",
+                    "",
+                    10
+                )
+
+                if justificacion.strip():
+
+                    pdf.multi_cell(
+                        0,
+                        6,
+                        justificacion
+                    )
+
+                else:
+
+                    pdf.multi_cell(
+                        0,
+                        6,
+                        "No se registro una justificacion adicional."
+                    )
+
+                pdf.ln(5)
+
+                # --------------------------------------------
+                # NOTAS
+                # --------------------------------------------
+
+                pdf.set_font(
+                    "Helvetica",
+                    "B",
+                    12
+                )
+
+                pdf.cell(
+                    0,
+                    8,
+                    "6. Consideraciones",
+                    ln=True
+                )
+
+                pdf.set_font(
+                    "Helvetica",
+                    "",
+                    9
+                )
+
+                pdf.multi_cell(
+                    0,
+                    5,
+                    "La referencia 60/20/20 corresponde a la practica "
+                    "historica de la planta y no representa una "
+                    "formulacion optima obligatoria."
+                )
+
+                pdf.multi_cell(
+                    0,
+                    5,
+                    "Las propiedades del aserrin son referenciales "
+                    "(20% humedad, 50% carbono y 0.10% nitrogeno) "
+                    "hasta disponer de ficha tecnica o caracterizacion."
+                )
+
+                pdf.multi_cell(
+                    0,
+                    5,
+                    "La planificacion puede realizarse a nivel diario, "
+                    "semanal o mensual. La dosificacion final debe "
+                    "verificarse con las condiciones reales de cada lote."
+                )
+
+                # --------------------------------------------
+                # DEVOLVER PDF
+                # --------------------------------------------
+
+                return bytes(
+                    pdf.output()
+                )
+
+            # ====================================================
+            # BOTÓN DE DESCARGA
+            # ====================================================
+
+            pdf_reporte = generar_reporte_pdf()
+
+            nombre_pdf = (
+                f"SAFCO_planificacion_"
+                f"{periodo_planificacion.lower()}_"
+                f"{datetime.now().strftime('%Y%m%d_%H%M')}.pdf"
+            )
+
+            st.download_button(
+                label="📄 Descargar reporte PDF",
+                data=pdf_reporte,
+                file_name=nombre_pdf,
+                mime="application/pdf",
+                use_container_width=True
+            )
 
             # ====================================================
             # EXPLICACIÓN DEL INDICADOR
