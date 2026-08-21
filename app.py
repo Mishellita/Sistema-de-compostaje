@@ -1295,7 +1295,6 @@ elif menu == "Capacidad de lodo":
     # MODO 2
     # PLANIFICAR MATERIALES PARA UNA CANTIDAD DE LODO A PROCESAR
     # ============================================================
-
     else:
 
         st.subheader(
@@ -1303,15 +1302,13 @@ elif menu == "Capacidad de lodo":
         )
 
         st.write(
-            "Ingrese los materiales que espera utilizar durante el periodo "
-            "seleccionado y la cantidad de lodo que desea procesar. "
-            "SAFCO evaluará la mezcla, la comparará con la práctica "
-            "histórica 60/20/20 y estimará la cantidad de aserrín "
-            "que podría requerirse."
+            "Ingrese los materiales disponibles y la cantidad de lodo "
+            "que desea procesar. SAFCO comparará diferentes alternativas "
+            "de material estructurante para apoyar la planificación."
         )
 
         # ========================================================
-        # PERIODO DE PLANIFICACIÓN
+        # PERIODO
         # ========================================================
 
         periodo_planificacion = st.selectbox(
@@ -1326,9 +1323,7 @@ elif menu == "Capacidad de lodo":
         )
 
         st.caption(
-            "Las cantidades ingresadas deben corresponder al mismo periodo. "
-            "Por ejemplo, si selecciona 'Mensual', ingrese las toneladas "
-            "estimadas para todo el mes."
+            "Todas las cantidades deben corresponder al mismo periodo."
         )
 
         # ========================================================
@@ -1350,7 +1345,7 @@ elif menu == "Capacidad de lodo":
         )
 
         ca_obj = st.number_input(
-            "Cartón disponible para el periodo (ton)",
+            "Cartón disponible en el periodo (ton)",
             min_value=0.0,
             value=0.0,
             key="ca_obj"
@@ -1364,7 +1359,7 @@ elif menu == "Capacidad de lodo":
         )
 
         # ========================================================
-        # OBJETIVOS OPERATIVOS
+        # OBJETIVOS
         # ========================================================
 
         hum_objetivo = (
@@ -1376,7 +1371,7 @@ elif menu == "Capacidad de lodo":
         ) / 2
 
         # ========================================================
-        # FUNCIÓN GENERAL PARA EVALUAR UNA MEZCLA
+        # FUNCIÓN GENERAL DE MEZCLA
         # ========================================================
 
         def calcular_mezcla(
@@ -1488,58 +1483,54 @@ elif menu == "Capacidad de lodo":
             }
 
         # ========================================================
-        # FUNCIÓN PARA CALCULAR ASERRÍN
+        # FUNCIÓN DE MATERIAL NECESARIO PARA C/N OBJETIVO
         # ========================================================
 
-        def calcular_aserrin_requerido(
+        def material_para_cn(
             carbono_base,
             nitrogeno_base,
-            cn_actual
+            codigo_material
         ):
 
-            humedad_aserrin = (
-                insumos["AS"]["humedad"] / 100
+            humedad_mat = (
+                insumos[codigo_material]["humedad"]
+                / 100
             )
 
-            carbono_aserrin_ton = (
-                (1 - humedad_aserrin)
-                * insumos["AS"]["c"] / 100
+            carbono_mat = (
+                (1 - humedad_mat)
+                * insumos[codigo_material]["c"]
+                / 100
             )
 
-            nitrogeno_aserrin_ton = (
-                (1 - humedad_aserrin)
-                * insumos["AS"]["n"] / 100
+            nitrogeno_mat = (
+                (1 - humedad_mat)
+                * insumos[codigo_material]["n"]
+                / 100
             )
 
             denominador = (
-                carbono_aserrin_ton
+                carbono_mat
                 - cn_objetivo
-                * nitrogeno_aserrin_ton
+                * nitrogeno_mat
             )
 
-            # Si ya estamos en el objetivo o por encima,
-            # no se agrega aserrín por criterio C/N.
-            if cn_actual >= cn_objetivo:
-
-                return 0.0
-
             if denominador <= 0:
+                return 0
 
-                return 0.0
-
-            resultado = (
+            cantidad = (
                 cn_objetivo
                 * nitrogeno_base
                 - carbono_base
             ) / denominador
 
             return max(
-                0.0,
-                resultado
+                0,
+                cantidad
             )
 
         # ========================================================
-        # INICIO DEL CÁLCULO
+        # VALIDACIÓN
         # ========================================================
 
         masa_ingresada = (
@@ -1549,13 +1540,16 @@ elif menu == "Capacidad de lodo":
             + lodo_obj
         )
 
-        if masa_ingresada > 0 and lodo_obj > 0:
+        if (
+            masa_ingresada > 0
+            and lodo_obj > 0
+        ):
 
             # ====================================================
-            # 1. MEZCLA REAL SIN ASERRÍN
+            # MEZCLA BASE
             # ====================================================
 
-            mezcla_sin_aserrin = calcular_mezcla(
+            mezcla_base = calcular_mezcla(
                 ro_obj,
                 rod_obj,
                 ca_obj,
@@ -1564,34 +1558,9 @@ elif menu == "Capacidad de lodo":
             )
 
             # ====================================================
-            # 2. ASERRÍN ESTIMADO
-            # ====================================================
-
-            aserrin_requerido = (
-                calcular_aserrin_requerido(
-                    mezcla_sin_aserrin["carbono"],
-                    mezcla_sin_aserrin["nitrogeno"],
-                    mezcla_sin_aserrin["cn"]
-                )
-            )
-
-            # ====================================================
-            # 3. MEZCLA CON ASERRÍN
-            # ====================================================
-
-            mezcla_con_aserrin = calcular_mezcla(
-                ro_obj,
-                rod_obj,
-                ca_obj,
-                lodo_obj,
-                aserrin_requerido
-            )
-
-            # ====================================================
             # REFERENCIA HISTÓRICA 60 / 20 / 20
             # ====================================================
 
-            # El lodo representa históricamente el 20%.
             masa_hist = (
                 lodo_obj / 0.20
             )
@@ -1608,36 +1577,16 @@ elif menu == "Capacidad de lodo":
                 lodo_obj
             )
 
-            # El ROD no pertenece a la proporción histórica.
-            rod_hist = 0
-
-            mezcla_historica = calcular_mezcla(
+            mezcla_hist = calcular_mezcla(
                 ro_hist,
-                rod_hist,
+                0,
                 ca_hist,
                 ld_hist,
                 0
             )
 
-            aserrin_hist = (
-                calcular_aserrin_requerido(
-                    mezcla_historica["carbono"],
-                    mezcla_historica["nitrogeno"],
-                    mezcla_historica["cn"]
-                )
-            )
-
-            mezcla_historica_ajustada = calcular_mezcla(
-                ro_hist,
-                rod_hist,
-                ca_hist,
-                ld_hist,
-                aserrin_hist
-            )
-
             # ====================================================
-            # PROPORCIÓN REAL DEL OPERADOR
-            # 60/20/20 solo compara RO + CA + LD
+            # PROPORCIÓN REAL
             # ====================================================
 
             masa_prop = (
@@ -1672,47 +1621,38 @@ elif menu == "Capacidad de lodo":
             # ====================================================
 
             st.subheader(
-                "Referencia histórica de la planta"
-            )
-
-            st.write(
-                f"Para procesar {lodo_obj:.2f} ton de lodo siguiendo "
-                f"la práctica histórica 60% RO / 20% cartón / 20% lodo, "
-                f"las cantidades de referencia serían:"
+                "Referencia histórica de planta"
             )
 
             col_h1, col_h2, col_h3 = st.columns(3)
 
             with col_h1:
-
                 st.metric(
                     "RO de referencia",
                     f"{ro_hist:.2f} ton"
                 )
 
             with col_h2:
-
                 st.metric(
                     "Cartón de referencia",
                     f"{ca_hist:.2f} ton"
                 )
 
             with col_h3:
-
                 st.metric(
                     "Lodo",
                     f"{ld_hist:.2f} ton"
                 )
 
             st.caption(
-                "La proporción 60/20/20 corresponde a la práctica "
-                "histórica de la planta. No representa necesariamente "
-                "la formulación óptima."
+                "La referencia 60/20/20 representa la práctica "
+                "histórica de la planta. Se utiliza como comparación "
+                "y no como formulación óptima obligatoria."
             )
 
             # ====================================================
             # SECCIÓN 2
-            # LO QUE EL OPERADOR ESTÁ INGRESANDO
+            # PROPORCIÓN REAL
             # ====================================================
 
             st.subheader(
@@ -1722,21 +1662,18 @@ elif menu == "Capacidad de lodo":
             col_p1, col_p2, col_p3 = st.columns(3)
 
             with col_p1:
-
                 st.metric(
                     "RO",
                     f"{pct_ro:.1f}%"
                 )
 
             with col_p2:
-
                 st.metric(
                     "Cartón",
                     f"{pct_ca:.1f}%"
                 )
 
             with col_p3:
-
                 st.metric(
                     "Lodo",
                     f"{pct_ld:.1f}%"
@@ -1745,15 +1682,14 @@ elif menu == "Capacidad de lodo":
             if rod_obj > 0:
 
                 st.info(
-                    f"Se están incorporando adicionalmente "
+                    f"Se incluyen adicionalmente "
                     f"{rod_obj:.2f} ton de ROD. "
-                    f"El ROD se considera un insumo complementario "
-                    f"y no forma parte de la proporción histórica "
-                    f"60/20/20."
+                    f"El ROD se considera material complementario "
+                    f"y no forma parte de la referencia 60/20/20."
                 )
 
             # ====================================================
-            # DIFERENCIAS CONTRA 60/20/20
+            # DIFERENCIAS HISTÓRICAS
             # ====================================================
 
             st.subheader(
@@ -1780,8 +1716,9 @@ elif menu == "Capacidad de lodo":
                     )
 
                     st.caption(
-                        "Esta cantidad ya está disponible por encima "
-                        "de la referencia; no significa que deba añadirse."
+                        "Representa material disponible por encima "
+                        "de la referencia histórica. No significa "
+                        "que deba agregarse."
                     )
 
                 else:
@@ -1808,426 +1745,451 @@ elif menu == "Capacidad de lodo":
                     )
 
                     st.caption(
-                        "Representa lo que faltaría únicamente si "
-                        "se quisiera reproducir la práctica histórica."
+                        "Cantidad que faltaría únicamente si se "
+                        "quisiera reproducir la proporción histórica."
                     )
 
-# ====================================================
-            # SECCIÓN 3
-            # PLANIFICACIÓN DE MATERIAL ESTRUCTURANTE
+            # ====================================================
+            # ALTERNATIVA A
+            # SOLO ASERRÍN
             # ====================================================
 
-            # Indicador de aserrín por tonelada de lodo
-            if lodo_obj > 0:
-
-                aserrin_por_ton_lodo = (
-                    aserrin_requerido
-                    / lodo_obj
-                )
-
-            else:
-
-                aserrin_por_ton_lodo = 0
-
-
-            st.subheader(
-                "Planificación de material estructurante"
+            aserrin_solo = material_para_cn(
+                mezcla_base["carbono"],
+                mezcla_base["nitrogeno"],
+                "AS"
             )
 
-            col_a1, col_a2, col_a3, col_a4 = st.columns(4)
-
-            with col_a1:
-
-                st.metric(
-                    "Necesidad teórica de aserrín para el periodo",
-                    f"{aserrin_requerido:.2f} ton"
-                )
-
-            with col_a2:
-
-                st.metric(
-                    "Aserrín por tonelada de lodo",
-                    f"{aserrin_por_ton_lodo:.2f} ton/t LD"
-                )
-
-            with col_a3:
-
-                st.metric(
-                    "C/N objetivo",
-                    f"{cn_objetivo:.1f}"
-                )
-
-            with col_a4:
-
-                st.metric(
-                    "Humedad objetivo",
-                    f"{hum_objetivo:.1f}%"
-                )
-
-
-            st.info(
-                f"Para el periodo seleccionado "
-                f"({periodo_planificacion}), SAFCO estima "
-                f"una necesidad teórica de "
-                f"{aserrin_requerido:.2f} ton de aserrín "
-                f"para procesar {lodo_obj:.2f} ton de lodo. "
-                f"Esto equivale aproximadamente a "
-                f"{aserrin_por_ton_lodo:.2f} ton de aserrín "
-                f"por cada tonelada de lodo."
+            mezcla_solo_aserrin = calcular_mezcla(
+                ro_obj,
+                rod_obj,
+                ca_obj,
+                lodo_obj,
+                aserrin_solo
             )
 
-
-            st.warning(
-                "La cantidad mostrada corresponde a una "
-                "estimación teórica para planificación del periodo. "
-                "No debe interpretarse como una dosificación única "
-                "para toda la operación. La incorporación real de "
-                "aserrín debe verificarse progresivamente por lote "
-                "o periodo operativo, considerando la humedad real "
-                "de los materiales."
-            )
-
-
-            st.caption(
-                "El cálculo del aserrín utiliza actualmente valores "
-                "referenciales: 20% de humedad, 50% de carbono y "
-                "0.10% de nitrógeno. Estos parámetros deberán "
-                "actualizarse cuando se disponga de ficha técnica "
-                "o caracterización del aserrín suministrado."
-            )
-
-
-            # Alerta adicional si la cantidad resulta muy alta
-            if aserrin_por_ton_lodo > 1:
-
-                st.warning(
-                    "⚠️ El requerimiento calculado de aserrín es alto "
-                    "respecto a la cantidad de lodo a procesar. "
-                    "Se recomienda revisar la composición de la mezcla, "
-                    "la disponibilidad de cartón u otros materiales "
-                    "estructurantes y validar los parámetros utilizados "
-                    "antes de realizar una solicitud de abastecimiento."
-                )
             # ====================================================
-            # CUADRO DE ESCENARIOS
+            # ALTERNATIVA B
+            # SOLO CARTÓN ADICIONAL
+            # ====================================================
+
+            carton_adicional = material_para_cn(
+                mezcla_base["carbono"],
+                mezcla_base["nitrogeno"],
+                "CA"
+            )
+
+            mezcla_solo_carton = calcular_mezcla(
+                ro_obj,
+                rod_obj,
+                ca_obj + carton_adicional,
+                lodo_obj,
+                0
+            )
+
+            # ====================================================
+            # ALTERNATIVA C
+            # CARTÓN + ASERRÍN
+            # ====================================================
+
+            # Se toma primero el cartón faltante para acercarse
+            # a la referencia histórica.
+            carton_combinado = max(
+                0,
+                ca_hist - ca_obj
+            )
+
+            mezcla_con_carton_ref = calcular_mezcla(
+                ro_obj,
+                rod_obj,
+                ca_obj + carton_combinado,
+                lodo_obj,
+                0
+            )
+
+            aserrin_combinado = material_para_cn(
+                mezcla_con_carton_ref["carbono"],
+                mezcla_con_carton_ref["nitrogeno"],
+                "AS"
+            )
+
+            mezcla_combinada = calcular_mezcla(
+                ro_obj,
+                rod_obj,
+                ca_obj + carton_combinado,
+                lodo_obj,
+                aserrin_combinado
+            )
+
+            # ====================================================
+            # PLANIFICACIÓN DE ALTERNATIVAS
             # ====================================================
 
             st.subheader(
-                "Comparación de escenarios"
+                "Alternativas de material estructurante"
             )
 
-            df_escenarios = pd.DataFrame({
+            col_alt1, col_alt2, col_alt3 = st.columns(3)
+
+            with col_alt1:
+
+                st.metric(
+                    "Alternativa A - Aserrín",
+                    f"{aserrin_solo:.2f} ton"
+                )
+
+                st.caption(
+                    "Cantidad teórica si el ajuste se realiza "
+                    "exclusivamente con aserrín."
+                )
+
+            with col_alt2:
+
+                st.metric(
+                    "Alternativa B - Cartón adicional",
+                    f"{carton_adicional:.2f} ton"
+                )
+
+                st.caption(
+                    "Cantidad teórica si el ajuste se realiza "
+                    "exclusivamente con cartón."
+                )
+
+            with col_alt3:
+
+                st.metric(
+                    "Alternativa C - Cartón + aserrín",
+                    (
+                        f"{carton_combinado:.2f} ton CA + "
+                        f"{aserrin_combinado:.2f} ton AS"
+                    )
+                )
+
+                st.caption(
+                    "Primero aproxima el cartón a la referencia "
+                    "histórica y después calcula el aserrín necesario."
+                )
+
+            # ====================================================
+            # COMPARACIÓN DE ESCENARIOS
+            # ====================================================
+
+            st.subheader(
+                "Comparación técnica de escenarios"
+            )
+
+            df_alternativas = pd.DataFrame({
+
                 "Escenario": [
-                    "Mezcla ingresada sin aserrín",
-                    "Mezcla ingresada con aserrín",
-                    "Referencia histórica 60/20/20",
-                    "Referencia histórica + aserrín"
+                    "Mezcla sin ajuste",
+                    "Solo aserrín",
+                    "Solo cartón adicional",
+                    "Cartón + aserrín",
+                    "Referencia histórica 60/20/20"
                 ],
 
                 "RO (ton)": [
                     ro_obj,
                     ro_obj,
-                    ro_hist,
+                    ro_obj,
+                    ro_obj,
                     ro_hist
                 ],
 
                 "ROD (ton)": [
                     rod_obj,
                     rod_obj,
-                    0,
+                    rod_obj,
+                    rod_obj,
                     0
                 ],
 
-                "Cartón (ton)": [
+                "Cartón total (ton)": [
                     ca_obj,
                     ca_obj,
-                    ca_hist,
+                    ca_obj + carton_adicional,
+                    ca_obj + carton_combinado,
                     ca_hist
                 ],
 
                 "Lodo (ton)": [
                     lodo_obj,
                     lodo_obj,
-                    ld_hist,
+                    lodo_obj,
+                    lodo_obj,
                     ld_hist
                 ],
 
                 "Aserrín (ton)": [
                     0,
-                    aserrin_requerido,
+                    aserrin_solo,
                     0,
-                    aserrin_hist
+                    aserrin_combinado,
+                    0
                 ],
 
                 "Masa total (ton)": [
-                    mezcla_sin_aserrin["masa"],
-                    mezcla_con_aserrin["masa"],
-                    mezcla_historica["masa"],
-                    mezcla_historica_ajustada["masa"]
+                    mezcla_base["masa"],
+                    mezcla_solo_aserrin["masa"],
+                    mezcla_solo_carton["masa"],
+                    mezcla_combinada["masa"],
+                    mezcla_hist["masa"]
                 ],
 
                 "Humedad (%)": [
-                    mezcla_sin_aserrin["humedad"],
-                    mezcla_con_aserrin["humedad"],
-                    mezcla_historica["humedad"],
-                    mezcla_historica_ajustada["humedad"]
+                    mezcla_base["humedad"],
+                    mezcla_solo_aserrin["humedad"],
+                    mezcla_solo_carton["humedad"],
+                    mezcla_combinada["humedad"],
+                    mezcla_hist["humedad"]
                 ],
 
                 "Relación C/N": [
-                    mezcla_sin_aserrin["cn"],
-                    mezcla_con_aserrin["cn"],
-                    mezcla_historica["cn"],
-                    mezcla_historica_ajustada["cn"]
+                    mezcla_base["cn"],
+                    mezcla_solo_aserrin["cn"],
+                    mezcla_solo_carton["cn"],
+                    mezcla_combinada["cn"],
+                    mezcla_hist["cn"]
                 ]
             })
 
             st.dataframe(
-                df_escenarios,
+                df_alternativas,
                 use_container_width=True
             )
 
             # ====================================================
-            # EXPLICACIÓN DE LOS DOS ESCENARIOS PRINCIPALES
+            # FUNCIÓN DE ESTADO
             # ====================================================
 
-            st.subheader(
-                "Efecto del aserrín en la mezcla ingresada"
-            )
+            def evaluar_estado(mezcla):
 
-            col_e1, col_e2 = st.columns(2)
-
-            with col_e1:
-
-                st.write(
-                    "*Sin aserrín*"
+                cumple_hum = (
+                    mezcla["humedad"] >= hum_min
+                    and mezcla["humedad"] <= hum_max
                 )
 
-                st.metric(
-                    "Humedad",
-                    f"{mezcla_sin_aserrin['humedad']:.2f}%"
+                cumple_cn = (
+                    mezcla["cn"] >= cn_min
+                    and mezcla["cn"] <= cn_max
                 )
 
-                st.metric(
-                    "Relación C/N",
-                    f"{mezcla_sin_aserrin['cn']:.2f}"
-                )
+                if cumple_hum and cumple_cn:
 
-            with col_e2:
+                    return "VIABLE"
 
-                st.write(
-                    "*Con aserrín recomendado*"
-                )
-
-                st.metric(
-                    "Humedad",
-                    f"{mezcla_con_aserrin['humedad']:.2f}%"
-                )
-
-                st.metric(
-                    "Relación C/N",
-                    f"{mezcla_con_aserrin['cn']:.2f}"
-                )
-
-            # ====================================================
-            # AGUA TEÓRICA
-            # ====================================================
-
-            agua_teorica_ton = 0
-
-            if (
-                mezcla_con_aserrin["humedad"]
-                < hum_min
-            ):
-
-                hum_obj_decimal = (
-                    hum_objetivo / 100
-                )
-
-                agua_teorica_ton = (
-                    hum_obj_decimal
-                    * mezcla_con_aserrin["masa"]
-                    - mezcla_con_aserrin["agua"]
-                ) / (
-                    1 - hum_obj_decimal
-                )
-
-                agua_teorica_ton = max(
-                    0,
-                    agua_teorica_ton
-                )
-
-            agua_teorica_m3 = (
-                agua_teorica_ton
-            )
-
-            agua_teorica_litros = (
-                agua_teorica_ton * 1000
-            )
-            
-            # ====================================================
-            # EVALUACIÓN FINAL
-            # ====================================================
-
-            st.subheader(
-                "Evaluación de la mezcla planificada"
-            )
-
-            humedad_final = (
-                mezcla_con_aserrin["humedad"]
-            )
-
-            cn_final = (
-                mezcla_con_aserrin["cn"]
-            )
-
-            cumple_hum = (
-                humedad_final >= hum_min
-                and humedad_final <= hum_max
-            )
-
-            cumple_cn = (
-                cn_final >= cn_min
-                and cn_final <= cn_max
-            )
-
-            if (
-                cumple_hum
-                and cumple_cn
-            ):
-
-                if (
-                    humedad_final
-                    >= hum_max - 2
+                elif (
+                    cumple_cn
+                    and mezcla["humedad"] < hum_min
                 ):
 
-                    st.warning(
-                        "🟠 ADMISIBLE CERCA DEL LÍMITE SUPERIOR: "
-                        "la mezcla cumple técnicamente, pero la humedad "
-                        "está próxima al máximo establecido. "
-                        "Se recomienda verificar la humedad real antes "
-                        "de conformar la pila."
-                    )
+                    return "AJUSTE DE HUMEDAD"
+
+                elif (
+                    cumple_cn
+                    and mezcla["humedad"] > hum_max
+                ):
+
+                    return "HUMEDAD ALTA"
 
                 else:
 
-                    st.success(
-                        "🟢 VIABLE PARA CONFORMACIÓN: "
-                        "la mezcla se encuentra dentro de los rangos "
-                        "iniciales de humedad y relación C/N."
-                    )
+                    return "REFORMULAR"
 
-            elif (
-                cumple_cn
-                and humedad_final < hum_min
-            ):
+            estado_aserrin = evaluar_estado(
+                mezcla_solo_aserrin
+            )
 
-                st.warning(
-                    "🟡 VIABLE CON AJUSTE DE HUMEDAD: "
-                    "la relación C/N está dentro del rango, pero "
-                    "la mezcla presenta humedad insuficiente."
+            estado_carton = evaluar_estado(
+                mezcla_solo_carton
+            )
+
+            estado_combinada = evaluar_estado(
+                mezcla_combinada
+            )
+
+            # ====================================================
+            # RECOMENDACIÓN DE ALTERNATIVA
+            # ====================================================
+
+            st.subheader(
+                "Lectura para la toma de decisión"
+            )
+
+            if estado_combinada == "VIABLE":
+
+                st.success(
+                    "🟢 La alternativa combinada de cartón + aserrín "
+                    "permite obtener una mezcla dentro de los rangos "
+                    "de humedad y relación C/N."
                 )
 
-                col_r1, col_r2 = st.columns(2)
+            elif estado_aserrin == "VIABLE":
 
-                with col_r1:
-
-                    st.metric(
-                        "Agua teórica de riego",
-                        f"{agua_teorica_m3:.2f} m³"
-                    )
-
-                with col_r2:
-
-                    st.metric(
-                        "Equivalente aproximado",
-                        f"{agua_teorica_litros:.0f} L"
-                    )
-
-                st.info(
-                    "La cantidad de agua constituye una estimación "
-                    "matemática. El riego debe realizarse progresivamente "
-                    "y verificando la humedad real de la mezcla."
+                st.success(
+                    "🟢 La alternativa con aserrín permite obtener "
+                    "una mezcla dentro de los rangos establecidos."
                 )
 
-            elif (
-                cumple_cn
-                and humedad_final > hum_max
-            ):
+            elif estado_carton == "VIABLE":
 
-                st.error(
-                    "🔴 REFORMULAR POR HUMEDAD ALTA: "
-                    "la mezcla continúa demasiado húmeda incluso "
-                    "después del ajuste calculado."
+                st.success(
+                    "🟢 La alternativa con cartón adicional permite "
+                    "obtener una mezcla dentro de los rangos establecidos."
                 )
 
             else:
 
-                st.error(
-                    "🔴 REFORMULAR: con los materiales ingresados "
-                    "no se alcanza una condición adecuada de relación C/N. "
-                    "Revise las cantidades y la disponibilidad de "
-                    "material estructurante."
+                st.warning(
+                    "⚠️ Ninguna de las alternativas simples alcanza "
+                    "simultáneamente los objetivos de humedad y relación C/N. "
+                    "Esto no representa necesariamente un error de cálculo. "
+                    "Indica que la composición inicial está alejada de "
+                    "la condición objetivo y debe redistribuirse entre "
+                    "lotes o reformularse antes de definir una compra."
                 )
 
             # ====================================================
-            # GUÍA PARA OPERADOR / SUPERVISOR
+            # DETALLE DE CADA ALTERNATIVA
+            # ====================================================
+
+            st.subheader(
+                "Resultado de cada alternativa"
+            )
+
+            col_r1, col_r2, col_r3 = st.columns(3)
+
+            with col_r1:
+
+                st.write(
+                    "*Solo aserrín*"
+                )
+
+                st.metric(
+                    "Humedad",
+                    f"{mezcla_solo_aserrin['humedad']:.2f}%"
+                )
+
+                st.metric(
+                    "C/N",
+                    f"{mezcla_solo_aserrin['cn']:.2f}"
+                )
+
+                st.write(
+                    f"Estado: *{estado_aserrin}*"
+                )
+
+            with col_r2:
+
+                st.write(
+                    "*Solo cartón*"
+                )
+
+                st.metric(
+                    "Humedad",
+                    f"{mezcla_solo_carton['humedad']:.2f}%"
+                )
+
+                st.metric(
+                    "C/N",
+                    f"{mezcla_solo_carton['cn']:.2f}"
+                )
+
+                st.write(
+                    f"Estado: *{estado_carton}*"
+                )
+
+            with col_r3:
+
+                st.write(
+                    "*Cartón + aserrín*"
+                )
+
+                st.metric(
+                    "Humedad",
+                    f"{mezcla_combinada['humedad']:.2f}%"
+                )
+
+                st.metric(
+                    "C/N",
+                    f"{mezcla_combinada['cn']:.2f}"
+                )
+
+                st.write(
+                    f"Estado: *{estado_combinada}*"
+                )
+
+            # ====================================================
+            # EXPLICACIÓN
             # ====================================================
 
             with st.expander(
-                "¿Qué significa cada resultado?"
+                "¿Cómo interpretar las alternativas?"
             ):
 
                 st.write(
-                    "*RO de referencia:* cantidad de residuos orgánicos "
-                    "que correspondería a la práctica histórica 60/20/20 "
-                    "para las toneladas de lodo seleccionadas."
+                    "*Solo aserrín:* muestra cuánto aserrín sería "
+                    "necesario si se utilizara como único material "
+                    "corrector de la relación C/N."
                 )
 
                 st.write(
-                    "*Cartón de referencia:* cantidad de cartón que "
-                    "correspondería a esa misma proporción histórica."
+                    "*Solo cartón:* evalúa la cantidad de cartón "
+                    "adicional necesaria si se utiliza únicamente "
+                    "este material estructurante."
                 )
 
                 st.write(
-                    "*Aserrín a gestionar:* estimación del material "
-                    "estructurante que debería planificarse para mejorar "
-                    "la relación C/N de la mezcla."
+                    "*Cartón + aserrín:* primero aprovecha el cartón "
+                    "como material habitual de planta y después utiliza "
+                    "aserrín como complemento."
                 )
 
                 st.write(
-                    "*Sin aserrín:* muestra cómo quedaría la mezcla "
-                    "utilizando únicamente los materiales ingresados."
+                    "**Una cantidad elevada de material estructurante "
+                    "no significa automáticamente que el cálculo esté "
+                    "equivocado.** Puede indicar que los materiales "
+                    "ingresados se encuentran muy alejados de las "
+                    "condiciones objetivo."
                 )
 
                 st.write(
-                    "*Con aserrín:* muestra el efecto estimado de "
-                    "incorporar la cantidad calculada de aserrín."
+                    "*Planificación mensual:* permite estimar necesidades "
+                    "de abastecimiento. La aplicación real debe verificarse "
+                    "por lote, semana o periodo operativo según las "
+                    "condiciones reales de los materiales."
                 )
 
                 st.write(
-                    "*Humedad objetivo:* corresponde al punto medio "
-                    "del rango técnico de la fase inicial. No es un "
-                    "límite obligatorio, sino una referencia de trabajo "
-                    "con margen operacional."
+                    f"Rango de humedad utilizado: "
+                    f"{hum_min:.0f}% - {hum_max:.0f}%."
                 )
 
                 st.write(
-                    "*Referencia 60/20/20:* es una práctica histórica "
-                    "de la planta, no una formulación óptima demostrada."
+                    f"Objetivo operativo de humedad: "
+                    f"{hum_objetivo:.1f}%."
                 )
 
                 st.write(
-                    "*ROD:* es un material complementario nuevo. "
-                    "SAFCO lo incluye en los balances de humedad y C/N, "
-                    "pero no lo incorpora dentro de la proporción "
-                    "histórica 60/20/20."
+                    f"Rango C/N utilizado: "
+                    f"{cn_min:.1f} - {cn_max:.1f}."
                 )
+
+                st.write(
+                    f"Objetivo C/N: "
+                    f"{cn_objetivo:.1f}."
+                )
+
+            st.warning(
+                "Las propiedades del aserrín siguen siendo referenciales. "
+                "La planificación debe recalcularse cuando se disponga "
+                "de ficha técnica o caracterización del material real."
+            )
 
             st.caption(
                 f"Periodo evaluado: {periodo_planificacion}. "
-                "La estimación puede utilizarse para planificación "
-                "diaria, semanal o mensual; la dosificación final debe "
-                "verificarse según las condiciones reales de cada lote."
+                "La referencia 60/20/20 se utiliza únicamente como "
+                "comparación de la práctica histórica de planta."
             )
 
         else:
