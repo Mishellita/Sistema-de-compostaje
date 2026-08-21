@@ -1406,192 +1406,192 @@ if modo_capacidad == "Calcular lodo máximo según materiales disponibles":
     # MODO 2
     # PLANIFICAR MATERIALES PARA UNA CANTIDAD DE LODO A PROCESAR
     # ============================================================
-    else:
-
-        st.subheader(
-            "Planificación para una cantidad de lodo a procesar"
-        )
-
-        st.write(
-            "Ingrese los materiales disponibles y la cantidad de lodo "
-            "que desea procesar. SAFCO comparará diferentes alternativas "
-            "de material estructurante para apoyar la planificación."
-        )
-
-        # ========================================================
-        # PERIODO
-        # ========================================================
-
-        periodo_planificacion = st.selectbox(
-            "Periodo de planificación",
-            [
-                "Diario",
-                "Semanal",
-                "Mensual",
-                "Otro"
-            ],
-            key="periodo_planificacion"
-        )
-
-        st.caption(
-            "Todas las cantidades deben corresponder al mismo periodo."
-        )
-
-        # ========================================================
-        # DATOS DE ENTRADA
-        # ========================================================
-
-        ro_obj = st.number_input(
-            "Residuos Orgánicos a procesar en el periodo (ton)",
-            min_value=0.0,
-            value=0.0,
-            key="ro_obj"
-        )
-
-        rod_obj = st.number_input(
-            "Residuos Orgánicos Deshidratados a procesar en el periodo (ton)",
-            min_value=0.0,
-            value=0.0,
-            key="rod_obj"
-        )
-
-        ca_obj = st.number_input(
-            "Cartón disponible en el periodo (ton)",
-            min_value=0.0,
-            value=0.0,
-            key="ca_obj"
-        )
-
-        lodo_obj = st.number_input(
-            "Lodo que se desea procesar en el periodo (ton)",
-            min_value=0.0,
-            value=0.0,
-            key="lodo_obj"
-        )
-
-        # ========================================================
-        # OBJETIVOS
-        # ========================================================
-
-        hum_objetivo = (
-            hum_min + hum_max
-        ) / 2
-
-        cn_objetivo = (
-            cn_min + cn_max
-        ) / 2
-
-        # ========================================================
-        # FUNCIÓN GENERAL DE MEZCLA
-        # ========================================================
-
-        def calcular_mezcla(
-            ro,
-            rod,
-            ca,
-            ld,
-            aserrin=0.0
-        ):
-
-            masa_total = (
-                ro
-                + rod
-                + ca
-                + ld
-                + aserrin
+        else:
+    
+            st.subheader(
+                "Planificación para una cantidad de lodo a procesar"
             )
-
-            carbono_total = (
-                ro
-                * (1 - insumos["RO"]["humedad"] / 100)
-                * insumos["RO"]["c"] / 100
-
-                + rod
-                * (1 - insumos["ROD"]["humedad"] / 100)
-                * insumos["ROD"]["c"] / 100
-
-                + ca
-                * (1 - insumos["CA"]["humedad"] / 100)
-                * insumos["CA"]["c"] / 100
-
-                + ld
-                * (1 - insumos["LD"]["humedad"] / 100)
-                * insumos["LD"]["c"] / 100
-
-                + aserrin
-                * (1 - insumos["AS"]["humedad"] / 100)
-                * insumos["AS"]["c"] / 100
+    
+            st.write(
+                "Ingrese los materiales disponibles y la cantidad de lodo "
+                "que desea procesar. SAFCO comparará diferentes alternativas "
+                "de material estructurante para apoyar la planificación."
             )
-
-            nitrogeno_total = (
-                ro
-                * (1 - insumos["RO"]["humedad"] / 100)
-                * insumos["RO"]["n"] / 100
-
-                + rod
-                * (1 - insumos["ROD"]["humedad"] / 100)
-                * insumos["ROD"]["n"] / 100
-
-                + ca
-                * (1 - insumos["CA"]["humedad"] / 100)
-                * insumos["CA"]["n"] / 100
-
-                + ld
-                * (1 - insumos["LD"]["humedad"] / 100)
-                * insumos["LD"]["n"] / 100
-
-                + aserrin
-                * (1 - insumos["AS"]["humedad"] / 100)
-                * insumos["AS"]["n"] / 100
+    
+            # ========================================================
+            # PERIODO
+            # ========================================================
+    
+            periodo_planificacion = st.selectbox(
+                "Periodo de planificación",
+                [
+                    "Diario",
+                    "Semanal",
+                    "Mensual",
+                    "Otro"
+                ],
+                key="periodo_planificacion"
             )
-
-            agua_total = (
-                ro
-                * insumos["RO"]["humedad"] / 100
-
-                + rod
-                * insumos["ROD"]["humedad"] / 100
-
-                + ca
-                * insumos["CA"]["humedad"] / 100
-
-                + ld
-                * insumos["LD"]["humedad"] / 100
-
-                + aserrin
-                * insumos["AS"]["humedad"] / 100
+    
+            st.caption(
+                "Todas las cantidades deben corresponder al mismo periodo."
             )
-
-            if masa_total > 0:
-
-                humedad = (
-                    agua_total
-                    / masa_total
-                ) * 100
-
-            else:
-
-                humedad = 0
-
-            if nitrogeno_total > 0:
-
-                relacion_cn = (
-                    carbono_total
-                    / nitrogeno_total
+    
+            # ========================================================
+            # DATOS DE ENTRADA
+            # ========================================================
+    
+            ro_obj = st.number_input(
+                "Residuos Orgánicos a procesar en el periodo (ton)",
+                min_value=0.0,
+                value=0.0,
+                key="ro_obj"
+            )
+    
+            rod_obj = st.number_input(
+                "Residuos Orgánicos Deshidratados a procesar en el periodo (ton)",
+                min_value=0.0,
+                value=0.0,
+                key="rod_obj"
+            )
+    
+            ca_obj = st.number_input(
+                "Cartón disponible en el periodo (ton)",
+                min_value=0.0,
+                value=0.0,
+                key="ca_obj"
+            )
+    
+            lodo_obj = st.number_input(
+                "Lodo que se desea procesar en el periodo (ton)",
+                min_value=0.0,
+                value=0.0,
+                key="lodo_obj"
+            )
+    
+            # ========================================================
+            # OBJETIVOS
+            # ========================================================
+    
+            hum_objetivo = (
+                hum_min + hum_max
+            ) / 2
+    
+            cn_objetivo = (
+                cn_min + cn_max
+            ) / 2
+    
+            # ========================================================
+            # FUNCIÓN GENERAL DE MEZCLA
+            # ========================================================
+    
+            def calcular_mezcla(
+                ro,
+                rod,
+                ca,
+                ld,
+                aserrin=0.0
+            ):
+    
+                masa_total = (
+                    ro
+                    + rod
+                    + ca
+                    + ld
+                    + aserrin
                 )
-
-            else:
-
-                relacion_cn = 0
-
-            return {
-                "masa": masa_total,
-                "carbono": carbono_total,
-                "nitrogeno": nitrogeno_total,
-                "agua": agua_total,
-                "humedad": humedad,
-                "cn": relacion_cn
-            }
+    
+                carbono_total = (
+                    ro
+                    * (1 - insumos["RO"]["humedad"] / 100)
+                    * insumos["RO"]["c"] / 100
+    
+                    + rod
+                    * (1 - insumos["ROD"]["humedad"] / 100)
+                    * insumos["ROD"]["c"] / 100
+    
+                    + ca
+                    * (1 - insumos["CA"]["humedad"] / 100)
+                    * insumos["CA"]["c"] / 100
+    
+                    + ld
+                    * (1 - insumos["LD"]["humedad"] / 100)
+                    * insumos["LD"]["c"] / 100
+    
+                    + aserrin
+                    * (1 - insumos["AS"]["humedad"] / 100)
+                    * insumos["AS"]["c"] / 100
+                )
+    
+                nitrogeno_total = (
+                    ro
+                    * (1 - insumos["RO"]["humedad"] / 100)
+                    * insumos["RO"]["n"] / 100
+    
+                    + rod
+                    * (1 - insumos["ROD"]["humedad"] / 100)
+                    * insumos["ROD"]["n"] / 100
+    
+                    + ca
+                    * (1 - insumos["CA"]["humedad"] / 100)
+                    * insumos["CA"]["n"] / 100
+    
+                    + ld
+                    * (1 - insumos["LD"]["humedad"] / 100)
+                    * insumos["LD"]["n"] / 100
+    
+                    + aserrin
+                    * (1 - insumos["AS"]["humedad"] / 100)
+                    * insumos["AS"]["n"] / 100
+                )
+    
+                agua_total = (
+                    ro
+                    * insumos["RO"]["humedad"] / 100
+    
+                    + rod
+                    * insumos["ROD"]["humedad"] / 100
+    
+                    + ca
+                    * insumos["CA"]["humedad"] / 100
+    
+                    + ld
+                    * insumos["LD"]["humedad"] / 100
+    
+                    + aserrin
+                    * insumos["AS"]["humedad"] / 100
+                )
+    
+                if masa_total > 0:
+    
+                    humedad = (
+                        agua_total
+                        / masa_total
+                    ) * 100
+    
+                else:
+    
+                    humedad = 0
+    
+                if nitrogeno_total > 0:
+    
+                    relacion_cn = (
+                        carbono_total
+                        / nitrogeno_total
+                    )
+    
+                else:
+    
+                    relacion_cn = 0
+    
+                return {
+                    "masa": masa_total,
+                    "carbono": carbono_total,
+                    "nitrogeno": nitrogeno_total,
+                    "agua": agua_total,
+                    "humedad": humedad,
+                    "cn": relacion_cn
+                }
 
         # ========================================================
         # FUNCIÓN DE MATERIAL NECESARIO PARA C/N OBJETIVO
