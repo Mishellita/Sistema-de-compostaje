@@ -2013,6 +2013,10 @@ elif menu == "Capacidad de lodo":
                 )
 
             else:
+                st.error(
+                    "🔴 REFORMULAR: la relación C/N estimada "
+                    "se encuentra fuera del rango técnico."
+                )
            # ====================================================
             # NOTAS DE INTERPRETACIÓN
             # ====================================================
