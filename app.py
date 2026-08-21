@@ -1209,7 +1209,22 @@ elif menu == "Capacidad de lodo":
                 df_escenarios,
                 use_container_width=True
             )
-
+            alternativa_seleccionada = st.selectbox(
+                "Seleccione la alternativa que se aplicará",
+                [
+                    "Solo aserrín",
+                    "Solo cartón",
+                    "Cartón + aserrín"
+                ]
+            )
+            justificacion = st.text_area(
+                "Justificación / observación de la decisión",
+                placeholder=(
+                    "Ejemplo: Se selecciona cartón + aserrín porque mantiene "
+                    "la humedad dentro del rango y permite aprovechar el cartón "
+                    "disponible en planta."
+                )
+            )
             # ====================================================
             # EVALUACIÓN DE LA RECOMENDACIÓN
             # ====================================================
