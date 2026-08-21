@@ -1869,7 +1869,38 @@ elif menu == "Capacidad de lodo":
                     "Primero aproxima el cartón a la referencia "
                     "histórica y después calcula el aserrín necesario."
                 )
-
+            # ====================================================
+            # INDICADORES DE ESTRUCTURANTE POR TONELADA DE LODO
+            # ====================================================
+            
+            if lodo_obj > 0:
+            
+                # Alternativa A: solo aserrín
+                estructurante_por_ton_aserrin = (
+                    aserrin_solo / lodo_obj
+                )
+            
+                # Alternativa B: solo cartón adicional
+                estructurante_por_ton_carton = (
+                    carton_adicional / lodo_obj
+                )
+            
+                # Alternativa C: cartón + aserrín
+                estructurante_total_combinado = (
+                    carton_combinado
+                    + aserrin_combinado
+                )
+            
+                estructurante_por_ton_combinado = (
+                    estructurante_total_combinado / lodo_obj
+                )
+            
+            else:
+            
+                estructurante_por_ton_aserrin = 0
+                estructurante_por_ton_carton = 0
+                estructurante_total_combinado = 0
+                estructurante_por_ton_combinado = 0
             # ====================================================
             # COMPARACIÓN DE ESCENARIOS
             # ====================================================
