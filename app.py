@@ -1398,11 +1398,11 @@ if modo_capacidad == "Calcular lodo máximo según materiales disponibles":
                 "Ingrese al menos una cantidad de material "
                 "disponible para realizar la simulación."
             )
+        else:
     # ============================================================
     # MODO 2
     # PLANIFICAR MATERIALES PARA UNA CANTIDAD DE LODO A PROCESAR
     # ============================================================
-            else:
     
             st.subheader(
                 "Planificación para una cantidad de lodo a procesar"
