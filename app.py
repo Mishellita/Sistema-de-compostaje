@@ -1963,51 +1963,40 @@ elif menu == "Capacidad de lodo":
             # ====================================================
 
             def evaluar_estado(mezcla):
-
-                cumple_hum = (
-                    mezcla["humedad"] >= hum_min
-                    and mezcla["humedad"] <= hum_max
-                )
-
+            
+                humedad = mezcla["humedad"]
+                cn = mezcla["cn"]
+            
+                # --------------------------------------------
+                # Primero evaluamos C/N
+                # --------------------------------------------
+            
                 cumple_cn = (
-                    mezcla["cn"] >= cn_min
-                    and mezcla["cn"] <= cn_max
+                    cn >= cn_min
+                    and cn <= cn_max
                 )
-
-                if cumple_hum and cumple_cn:
-
-                    return "VIABLE"
-
-                elif (
-                    cumple_cn
-                    and mezcla["humedad"] < hum_min
-                ):
-
-                    return "AJUSTE DE HUMEDAD"
-
-                elif (
-                    cumple_cn
-                    and mezcla["humedad"] > hum_max
-                ):
-
-                    return "HUMEDAD ALTA"
-
-                else:
-
+            
+                if not cumple_cn:
                     return "REFORMULAR"
-
-            estado_aserrin = evaluar_estado(
-                mezcla_solo_aserrin
-            )
-
-            estado_carton = evaluar_estado(
-                mezcla_solo_carton
-            )
-
-            estado_combinada = evaluar_estado(
-                mezcla_combinada
-            )
-
+            
+                # --------------------------------------------
+                # Luego evaluamos humedad
+                # --------------------------------------------
+            
+                if humedad < hum_min:
+                    return "HUMEDAD BAJA"
+            
+                elif humedad <= hum_min + 2:
+                    return "VIABLE CERCA DEL LÍMITE MÍNIMO"
+            
+                elif humedad > hum_max:
+                    return "HUMEDAD ALTA"
+            
+                elif humedad >= hum_max - 2:
+                    return "VIABLE CERCA DEL LÍMITE MÁXIMO"
+            
+                else:
+                    return "VIABLE"
             # ====================================================
             # RECOMENDACIÓN DE ALTERNATIVA
             # ====================================================
