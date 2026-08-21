@@ -1293,7 +1293,7 @@ elif menu == "Capacidad de lodo":
 
 # ============================================================
     # MODO 2
-    # PLANIFICAR MEZCLA PARA PROCESAR UNA CANTIDAD DE LODO
+    # PLANIFICAR MATERIALES PARA UNA CANTIDAD DE LODO A PROCESAR
     # ============================================================
 
     else:
@@ -1303,14 +1303,14 @@ elif menu == "Capacidad de lodo":
         )
 
         st.write(
-            "Ingrese los materiales disponibles en planta y la cantidad "
-            "de lodo que necesita procesar. SAFCO estimará cuánto aserrín "
-            "se requiere para obtener una relación C/N adecuada y verificará "
-            "la humedad resultante de la mezcla."
+            "Ingrese los materiales disponibles y la cantidad de lodo "
+            "que necesita procesar. SAFCO estimará cuánto aserrín debe "
+            "gestionarse y verificará la relación C/N y la humedad "
+            "esperada de la mezcla."
         )
 
         # ========================================================
-        # MATERIALES DISPONIBLES
+        # DATOS DE ENTRADA
         # ========================================================
 
         ro_obj = st.number_input(
@@ -1361,6 +1361,77 @@ elif menu == "Capacidad de lodo":
         )
 
         if masa_base > 0 and lodo_obj > 0:
+
+            # ====================================================
+            # REFERENCIA OPERATIVA HISTÓRICA 60 / 20 / 20
+            # Se consideran RO + Cartón + LD.
+            # El ROD se presenta como insumo complementario.
+            # ====================================================
+
+            masa_referencia = (
+                ro_obj
+                + ca_obj
+                + lodo_obj
+            )
+
+            if masa_referencia > 0:
+
+                pct_ro = (
+                    ro_obj / masa_referencia
+                ) * 100
+
+                pct_ca = (
+                    ca_obj / masa_referencia
+                ) * 100
+
+                pct_ld = (
+                    lodo_obj / masa_referencia
+                ) * 100
+
+            else:
+
+                pct_ro = 0
+                pct_ca = 0
+                pct_ld = 0
+
+            st.subheader(
+                "Referencia de la práctica operativa"
+            )
+
+            col_ref1, col_ref2, col_ref3 = st.columns(3)
+
+            with col_ref1:
+                st.metric(
+                    "RO en mezcla base",
+                    f"{pct_ro:.1f}%"
+                )
+
+            with col_ref2:
+                st.metric(
+                    "Cartón en mezcla base",
+                    f"{pct_ca:.1f}%"
+                )
+
+            with col_ref3:
+                st.metric(
+                    "Lodo en mezcla base",
+                    f"{pct_ld:.1f}%"
+                )
+
+            st.caption(
+                "Referencia histórica de planta: "
+                "60% residuos orgánicos / 20% cartón / 20% lodo. "
+                "Esta proporción se utiliza únicamente como referencia "
+                "operativa y no como formulación óptima obligatoria."
+            )
+
+            if rod_obj > 0:
+
+                st.caption(
+                    f"Se consideran adicionalmente {rod_obj:.2f} ton "
+                    f"de residuos orgánicos deshidratados como "
+                    f"insumo complementario."
+                )
 
             # ====================================================
             # CARBONO DE LA MEZCLA BASE
@@ -1425,7 +1496,7 @@ elif menu == "Capacidad de lodo":
             )
 
             # ====================================================
-            # C/N Y HUMEDAD ANTES DEL ASERRÍN
+            # ESTADO ANTES DEL ASERRÍN
             # ====================================================
 
             if nitrogeno_base > 0:
@@ -1463,7 +1534,7 @@ elif menu == "Capacidad de lodo":
             )
 
             # ====================================================
-            # ASERRÍN REQUERIDO PARA C/N OBJETIVO
+            # CÁLCULO DEL ASERRÍN REQUERIDO
             # ====================================================
 
             denominador_aserrin = (
@@ -1472,8 +1543,8 @@ elif menu == "Capacidad de lodo":
                 * nitrogeno_por_ton_aserrin
             )
 
-            # Si la mezcla ya supera el objetivo,
-            # no necesita más aserrín por C/N.
+            # Si la C/N ya está por encima del objetivo,
+            # no se agrega aserrín solo por C/N.
             if cn_base >= cn_objetivo:
 
                 aserrin_requerido = 0
@@ -1496,7 +1567,7 @@ elif menu == "Capacidad de lodo":
                 aserrin_requerido = 0
 
             # ====================================================
-            # RESULTADO CON ASERRÍN
+            # RESULTADO DESPUÉS DEL ASERRÍN
             # ====================================================
 
             carbono_final = (
@@ -1533,20 +1604,13 @@ elif menu == "Capacidad de lodo":
 
                 cn_final = 0
 
-            if masa_con_aserrin > 0:
-
-                humedad_final = (
-                    agua_con_aserrin
-                    / masa_con_aserrin
-                ) * 100
-
-            else:
-
-                humedad_final = 0
+            humedad_final = (
+                agua_con_aserrin
+                / masa_con_aserrin
+            ) * 100
 
             # ====================================================
-            # CÁLCULO DE AGUA TEÓRICA PARA RIEGO
-            # SOLO SI LA HUMEDAD QUEDA POR DEBAJO DEL MÍNIMO
+            # AGUA TEÓRICA PARA AJUSTE DE HUMEDAD
             # ====================================================
 
             agua_teorica_ton = 0
@@ -1570,9 +1634,6 @@ elif menu == "Capacidad de lodo":
                     agua_teorica_ton
                 )
 
-            # Aproximación:
-            # 1 tonelada de agua ≈ 1 m3 ≈ 1000 litros
-
             agua_teorica_m3 = (
                 agua_teorica_ton
             )
@@ -1583,32 +1644,7 @@ elif menu == "Capacidad de lodo":
             )
 
             # ====================================================
-            # HUMEDAD DESPUÉS DEL RIEGO TEÓRICO
-            # ====================================================
-
-            masa_final_ajustada = (
-                masa_con_aserrin
-                + agua_teorica_ton
-            )
-
-            agua_final_ajustada = (
-                agua_con_aserrin
-                + agua_teorica_ton
-            )
-
-            if masa_final_ajustada > 0:
-
-                humedad_despues_riego = (
-                    agua_final_ajustada
-                    / masa_final_ajustada
-                ) * 100
-
-            else:
-
-                humedad_despues_riego = 0
-
-            # ====================================================
-            # PLANIFICACIÓN DE MATERIALES
+            # RESULTADO PRINCIPAL PARA OPERACIÓN
             # ====================================================
 
             st.subheader(
@@ -1638,14 +1674,23 @@ elif menu == "Capacidad de lodo":
                     f"{masa_con_aserrin:.2f} ton"
                 )
 
-            st.info(
-                f"Para procesar {lodo_obj:.2f} ton de lodo con los "
-                f"materiales ingresados, SAFCO estima que se requieren "
-                f"{aserrin_requerido:.2f} ton de aserrín."
-            )
+            if aserrin_requerido > 0:
+
+                st.info(
+                    f"Para procesar {lodo_obj:.2f} ton de lodo con "
+                    f"los materiales ingresados, se estima gestionar "
+                    f"{aserrin_requerido:.2f} ton de aserrín."
+                )
+
+            else:
+
+                st.info(
+                    "La mezcla ingresada no requiere aserrín adicional "
+                    "para alcanzar el objetivo operativo de relación C/N."
+                )
 
             # ====================================================
-            # RESULTADOS TÉCNICOS
+            # RESULTADO TÉCNICO
             # ====================================================
 
             st.subheader(
@@ -1676,7 +1721,7 @@ elif menu == "Capacidad de lodo":
                 )
 
             st.caption(
-                f"Rango técnico de C/N: "
+                f"Rango técnico C/N: "
                 f"{cn_min:.1f} - {cn_max:.1f}"
             )
 
@@ -1687,7 +1732,7 @@ elif menu == "Capacidad de lodo":
             )
 
             # ====================================================
-            # EVALUACIÓN Y SEMÁFORO
+            # SEMÁFORO
             # ====================================================
 
             cumple_cn = (
@@ -1700,32 +1745,21 @@ elif menu == "Capacidad de lodo":
                 and humedad_final <= hum_max
             )
 
-            # ----------------------------------------------------
-            # VERDE
-            # ----------------------------------------------------
-
             if cumple_cn and cumple_humedad:
 
                 if humedad_final >= (
                     hum_max - 2
                 ):
 
-                    estado_planificacion = (
-                        "ADMISIBLE CERCA DEL LÍMITE DE HUMEDAD"
-                    )
-
                     st.warning(
-                        "🟠 MEZCLA ADMISIBLE, PERO CON HUMEDAD "
-                        "CERCANA AL LÍMITE SUPERIOR. "
-                        "No se recomienda realizar riego adicional "
-                        "antes de verificar la humedad real de la mezcla."
+                        "🟠 ADMISIBLE CERCA DEL LÍMITE DE HUMEDAD: "
+                        "la mezcla cumple técnicamente, pero la humedad "
+                        "se encuentra próxima al límite superior. "
+                        "Verifique la humedad real antes de añadir "
+                        "más material húmedo o realizar riego."
                     )
 
                 else:
-
-                    estado_planificacion = (
-                        "VIABLE"
-                    )
 
                     st.success(
                         "🟢 VIABLE PARA CONFORMACIÓN: "
@@ -1733,23 +1767,15 @@ elif menu == "Capacidad de lodo":
                         "de relación C/N y humedad."
                     )
 
-            # ----------------------------------------------------
-            # AMARILLO - FALTA HUMEDAD
-            # ----------------------------------------------------
-
             elif (
                 cumple_cn
                 and humedad_final < hum_min
             ):
 
-                estado_planificacion = (
-                    "VIABLE CON AJUSTE DE HUMEDAD"
-                )
-
                 st.warning(
                     "🟡 VIABLE CON AJUSTE DE HUMEDAD: "
-                    "la relación C/N se encuentra dentro del rango, "
-                    "pero la mezcla presenta humedad insuficiente."
+                    "la relación C/N es adecuada, pero la mezcla "
+                    "presenta humedad insuficiente."
                 )
 
                 st.subheader(
@@ -1773,58 +1799,40 @@ elif menu == "Capacidad de lodo":
                     )
 
                 st.info(
-                    f"El cálculo estima que aproximadamente "
-                    f"{agua_teorica_m3:.2f} m³ de agua permitirían "
-                    f"llevar la mezcla hacia una humedad cercana a "
-                    f"{hum_objetivo:.1f}%."
+                    f"El balance de agua estima aproximadamente "
+                    f"{agua_teorica_m3:.2f} m³ para acercar la mezcla "
+                    f"a una humedad objetivo de {hum_objetivo:.1f}%."
                 )
 
                 st.warning(
-                    "Aplicar el riego progresivamente y verificar "
-                    "la humedad durante la mezcla. El volumen calculado "
-                    "es una estimación teórica de apoyo operacional y "
-                    "no debe aplicarse automáticamente en una sola etapa."
+                    "El riego debe realizarse progresivamente y "
+                    "verificando la humedad real de la pila. "
+                    "La cantidad mostrada es una estimación teórica "
+                    "de apoyo operacional."
                 )
-
-            # ----------------------------------------------------
-            # HUMEDAD DEMASIADO ALTA
-            # ----------------------------------------------------
 
             elif (
                 cumple_cn
                 and humedad_final > hum_max
             ):
 
-                estado_planificacion = (
-                    "REFORMULAR POR HUMEDAD ALTA"
-                )
-
                 st.error(
-                    "🔴 REFORMULAR: la relación C/N es adecuada, "
-                    "pero la humedad supera el límite establecido. "
-                    "No se recomienda agregar agua. Revise la "
-                    "proporción de materiales secos o estructurantes."
+                    "🔴 REFORMULAR POR HUMEDAD ALTA: "
+                    "la relación C/N se encuentra dentro del rango, "
+                    "pero la humedad supera el límite técnico. "
+                    "Revise la proporción de materiales secos."
                 )
-
-            # ----------------------------------------------------
-            # C/N FUERA DE RANGO
-            # ----------------------------------------------------
 
             else:
 
-                estado_planificacion = (
-                    "REFORMULAR"
-                )
-
                 st.error(
-                    "🔴 REFORMULAR MEZCLA: la relación C/N estimada "
-                    "se encuentra fuera del rango técnico establecido. "
-                    "Revise las cantidades de materiales antes de "
-                    "conformar la pila."
+                    "🔴 REFORMULAR: la relación C/N estimada "
+                    "se encuentra fuera del rango técnico. "
+                    "Revise las cantidades antes de conformar la pila."
                 )
 
             # ====================================================
-            # COMPARACIÓN ANTES / DESPUÉS
+            # COMPARACIÓN ANTES Y DESPUÉS DEL ASERRÍN
             # ====================================================
 
             st.subheader(
@@ -1856,7 +1864,7 @@ elif menu == "Capacidad de lodo":
             )
 
             # ====================================================
-            # EXPLICACIÓN PARA OPERADOR / SUPERVISOR
+            # EXPLICACIÓN
             # ====================================================
 
             with st.expander(
@@ -1864,81 +1872,62 @@ elif menu == "Capacidad de lodo":
             ):
 
                 st.write(
-                    "🟢 *VIABLE PARA CONFORMACIÓN:* "
-                    "la mezcla se encuentra dentro de los rangos "
-                    "establecidos de humedad y relación C/N."
+                    "🟢 *VIABLE:* la humedad y la relación C/N "
+                    "se encuentran dentro de los rangos establecidos."
                 )
 
                 st.write(
-                    "🟡 *VIABLE CON AJUSTE DE HUMEDAD:* "
-                    "la relación C/N es adecuada, pero la mezcla "
-                    "está demasiado seca. SAFCO estima un volumen "
-                    "teórico de agua para aproximarse al objetivo "
-                    "de humedad."
+                    "🟡 *AJUSTE DE HUMEDAD:* la C/N es adecuada, "
+                    "pero falta humedad. SAFCO calcula una cantidad "
+                    "teórica de agua para apoyar el riego."
                 )
 
                 st.write(
-                    "🟠 *ADMISIBLE CERCA DEL LÍMITE:* "
-                    "la mezcla todavía cumple técnicamente, pero "
-                    "se encuentra próxima al límite superior de "
-                    "humedad. Se recomienda verificar antes de "
-                    "añadir más agua o material húmedo."
+                    "🟠 *CERCA DEL LÍMITE:* la mezcla cumple, "
+                    "pero la humedad se encuentra próxima al máximo "
+                    "permitido y requiere mayor control."
                 )
 
                 st.write(
                     "🔴 *REFORMULAR:* uno o más parámetros se "
-                    "encuentran fuera de los límites establecidos. "
-                    "La composición debe revisarse antes de conformar "
-                    "la pila."
+                    "encuentran fuera de los límites establecidos."
                 )
 
                 st.write(
-                    "*Aserrín a gestionar:* representa la cantidad "
-                    "estimada que debería solicitarse, prepararse o "
-                    "adquirirse para procesar la cantidad de lodo "
-                    "indicada."
+                    "*Referencia 60/20/20:* corresponde a la práctica "
+                    "operativa histórica de 60% residuos orgánicos, "
+                    "20% cartón y 20% lodo. SAFCO la muestra como "
+                    "referencia, no como formulación óptima obligatoria."
                 )
 
                 st.write(
-                    "*Agua teórica de riego:* es una estimación "
-                    "matemática. El riego debe realizarse de manera "
-                    "progresiva y verificando la humedad real de la mezcla."
+                    "*ROD:* se considera como insumo complementario "
+                    "y se calcula con sus propiedades propias, debido "
+                    "a que su humedad es considerablemente distinta "
+                    "a la de los residuos orgánicos convencionales."
                 )
 
                 st.write(
-                    "*Relación C/N estimada:* el carbono utilizado "
-                    "por SAFCO para los insumos caracterizados se estimó "
-                    "a partir de los resultados de materia orgánica; "
-                    "por ello no corresponde a una determinación directa "
-                    "de C/N realizada por laboratorio."
+                    "*Aserrín:* la cantidad recomendada utiliza "
+                    "actualmente propiedades referenciales: "
+                    "20% de humedad, 50% de carbono y 0.10% "
+                    "de nitrógeno. Estos valores deben actualizarse "
+                    "cuando exista ficha técnica o caracterización "
+                    "del aserrín realmente suministrado."
                 )
-
-                st.write(
-                    "*Aserrín:* sus propiedades todavía corresponden "
-                    "a valores referenciales y deberán actualizarse "
-                    "cuando se disponga de caracterización del material "
-                    "real utilizado en planta."
-                )
-
-            # ====================================================
-            # NOTA SOBRE LIXIVIADO
-            # ====================================================
 
             st.caption(
-                "Nota: actualmente el ajuste de humedad se calcula "
-                "considerando agua. El posible aprovechamiento del "
-                "lixiviado generado durante la deshidratación de "
-                "residuos orgánicos queda como alternativa futura "
-                "sujeta a caracterización y validación experimental."
+                "El posible uso de lixiviado como agente humectante "
+                "queda pendiente de caracterización y validación "
+                "experimental. Actualmente el ajuste se calcula con agua."
             )
 
         else:
 
             st.info(
-                "Ingrese los materiales disponibles y una cantidad "
-                "de lodo mayor a cero para realizar la planificación."
+                "Ingrese una cantidad de lodo mayor a cero y los "
+                "materiales disponibles para realizar la planificación."
             )
-            
 elif menu == "Seguimiento":
     st.header("Seguimiento del compostaje")
 
