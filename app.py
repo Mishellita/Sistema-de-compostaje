@@ -1998,12 +1998,30 @@ elif menu == "Capacidad de lodo":
                 else:
                     return "VIABLE"
             # ====================================================
+            # EVALUAR CADA ALTERNATIVA
+            # ====================================================
+            
+            estado_aserrin = evaluar_estado(
+                mezcla_solo_aserrin
+            )
+            
+            estado_carton = evaluar_estado(
+                mezcla_solo_carton
+            )
+            
+            estado_combinada = evaluar_estado(
+                mezcla_combinada
+            )
+            
+            
+            # ====================================================
+            # LECTURA PARA LA TOMA DE DECISIÓN
+            # ====================================================
+            
+            st.subheader("Lectura para la toma de decisión")
+            # ====================================================
             # RECOMENDACIÓN DE ALTERNATIVA
             # ====================================================
-
-            st.subheader(
-                "Lectura para la toma de decisión"
-            )
 
             if estado_combinada == "VIABLE":
 
