@@ -1812,47 +1812,102 @@ elif menu == "Capacidad de lodo":
                         "se quisiera reproducir la práctica histórica."
                     )
 
-            # ====================================================
+# ====================================================
             # SECCIÓN 3
-            # PLANIFICACIÓN DE ASERRÍN
+            # PLANIFICACIÓN DE MATERIAL ESTRUCTURANTE
             # ====================================================
+
+            # Indicador de aserrín por tonelada de lodo
+            if lodo_obj > 0:
+
+                aserrin_por_ton_lodo = (
+                    aserrin_requerido
+                    / lodo_obj
+                )
+
+            else:
+
+                aserrin_por_ton_lodo = 0
+
 
             st.subheader(
                 "Planificación de material estructurante"
             )
 
-            col_a1, col_a2, col_a3 = st.columns(3)
+            col_a1, col_a2, col_a3, col_a4 = st.columns(4)
 
             with col_a1:
 
                 st.metric(
-                    "Aserrín a gestionar",
+                    "Necesidad teórica de aserrín para el periodo",
                     f"{aserrin_requerido:.2f} ton"
                 )
 
             with col_a2:
 
                 st.metric(
+                    "Aserrín por tonelada de lodo",
+                    f"{aserrin_por_ton_lodo:.2f} ton/t LD"
+                )
+
+            with col_a3:
+
+                st.metric(
                     "C/N objetivo",
                     f"{cn_objetivo:.1f}"
                 )
 
-            with col_a3:
+            with col_a4:
 
                 st.metric(
                     "Humedad objetivo",
                     f"{hum_objetivo:.1f}%"
                 )
 
-            st.warning(
-                "El aserrín se calcula actualmente utilizando "
-                "propiedades referenciales: 20% de humedad, "
-                "50% de carbono y 0.10% de nitrógeno. "
-                "La cantidad deberá recalcularse cuando exista "
-                "ficha técnica o caracterización del aserrín "
-                "real suministrado."
+
+            st.info(
+                f"Para el periodo seleccionado "
+                f"({periodo_planificacion}), SAFCO estima "
+                f"una necesidad teórica de "
+                f"{aserrin_requerido:.2f} ton de aserrín "
+                f"para procesar {lodo_obj:.2f} ton de lodo. "
+                f"Esto equivale aproximadamente a "
+                f"{aserrin_por_ton_lodo:.2f} ton de aserrín "
+                f"por cada tonelada de lodo."
             )
 
+
+            st.warning(
+                "La cantidad mostrada corresponde a una "
+                "estimación teórica para planificación del periodo. "
+                "No debe interpretarse como una dosificación única "
+                "para toda la operación. La incorporación real de "
+                "aserrín debe verificarse progresivamente por lote "
+                "o periodo operativo, considerando la humedad real "
+                "de los materiales."
+            )
+
+
+            st.caption(
+                "El cálculo del aserrín utiliza actualmente valores "
+                "referenciales: 20% de humedad, 50% de carbono y "
+                "0.10% de nitrógeno. Estos parámetros deberán "
+                "actualizarse cuando se disponga de ficha técnica "
+                "o caracterización del aserrín suministrado."
+            )
+
+
+            # Alerta adicional si la cantidad resulta muy alta
+            if aserrin_por_ton_lodo > 1:
+
+                st.warning(
+                    "⚠️ El requerimiento calculado de aserrín es alto "
+                    "respecto a la cantidad de lodo a procesar. "
+                    "Se recomienda revisar la composición de la mezcla, "
+                    "la disponibilidad de cartón u otros materiales "
+                    "estructurantes y validar los parámetros utilizados "
+                    "antes de realizar una solicitud de abastecimiento."
+                )
             # ====================================================
             # CUADRO DE ESCENARIOS
             # ====================================================
