@@ -599,10 +599,6 @@ elif menu == "Capacidad de lodo":
         ]
     )
 
-    # ============================================================
-    # MODO 1
-    # CALCULAR LODO MÁXIMO SEGÚN MATERIALES DISPONIBLES
-    # ============================================================
 if modo_capacidad == "Calcular lodo máximo según materiales disponibles":
 
         st.subheader("Materiales disponibles")
@@ -1402,7 +1398,7 @@ if modo_capacidad == "Calcular lodo máximo según materiales disponibles":
                 "Ingrese al menos una cantidad de material "
                 "disponible para realizar la simulación."
             )
-# ============================================================
+    # ============================================================
     # MODO 2
     # PLANIFICAR MATERIALES PARA UNA CANTIDAD DE LODO A PROCESAR
     # ============================================================
