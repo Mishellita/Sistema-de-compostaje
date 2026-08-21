@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+from fpdf import FPDF
+from io import BytesIO
+from datetime import datetime
 df_insumos = pd.read_csv("insumos.csv")
 df_parametros = pd.read_csv("parametros.csv")
 df_reglas = pd.read_csv("reglas.csv")
