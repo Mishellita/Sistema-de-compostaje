@@ -2270,6 +2270,178 @@ elif menu == "Capacidad de lodo":
                 st.write(
                     f"Estado: *{estado_combinada}*"
                 )
+# ====================================================
+            # SELECCIÓN DE ALTERNATIVA PARA REPORTE
+            # ====================================================
+
+            st.subheader(
+                "Selección de alternativa para reporte"
+            )
+
+            alternativa_seleccionada = st.selectbox(
+                "Seleccione la alternativa que se aplicará",
+                [
+                    "Solo aserrín",
+                    "Solo cartón",
+                    "Cartón + aserrín"
+                ],
+                key="alternativa_seleccionada_reporte"
+            )
+
+            justificacion = st.text_area(
+                "Justificación / observación de la decisión",
+                placeholder=(
+                    "Ejemplo: Se selecciona la alternativa con aserrín "
+                    "porque permite mantener la humedad y la relación C/N "
+                    "dentro de los rangos establecidos."
+                ),
+                key="justificacion_reporte"
+            )
+
+
+            # ====================================================
+            # ASIGNAR RESULTADOS SEGÚN LA ALTERNATIVA SELECCIONADA
+            # ====================================================
+
+            if alternativa_seleccionada == "Solo aserrín":
+
+                estructurante_cantidad = (
+                    aserrin_solo
+                )
+
+                estructurante_por_ton = (
+                    estructurante_por_ton_aserrin
+                )
+
+                humedad_reporte = (
+                    mezcla_solo_aserrin["humedad"]
+                )
+
+                cn_reporte = (
+                    mezcla_solo_aserrin["cn"]
+                )
+
+                masa_reporte = (
+                    mezcla_solo_aserrin["masa"]
+                )
+
+                estado_reporte = (
+                    estado_aserrin
+                )
+
+                detalle_estructurante = (
+                    f"Aserrin: {aserrin_solo:.2f} ton"
+                )
+
+
+            elif alternativa_seleccionada == "Solo cartón":
+
+                estructurante_cantidad = (
+                    carton_adicional
+                )
+
+                estructurante_por_ton = (
+                    estructurante_por_ton_carton
+                )
+
+                humedad_reporte = (
+                    mezcla_solo_carton["humedad"]
+                )
+
+                cn_reporte = (
+                    mezcla_solo_carton["cn"]
+                )
+
+                masa_reporte = (
+                    mezcla_solo_carton["masa"]
+                )
+
+                estado_reporte = (
+                    estado_carton
+                )
+
+                detalle_estructurante = (
+                    f"Carton adicional: "
+                    f"{carton_adicional:.2f} ton"
+                )
+
+
+            else:
+
+                estructurante_cantidad = (
+                    estructurante_total_combinado
+                )
+
+                estructurante_por_ton = (
+                    estructurante_por_ton_combinado
+                )
+
+                humedad_reporte = (
+                    mezcla_combinada["humedad"]
+                )
+
+                cn_reporte = (
+                    mezcla_combinada["cn"]
+                )
+
+                masa_reporte = (
+                    mezcla_combinada["masa"]
+                )
+
+                estado_reporte = (
+                    estado_combinada
+                )
+
+                detalle_estructurante = (
+                    f"Carton adicional: "
+                    f"{carton_combinado:.2f} ton | "
+                    f"Aserrin: {aserrin_combinado:.2f} ton"
+                )
+
+
+            # ====================================================
+            # RESUMEN DE LA DECISIÓN
+            # ====================================================
+
+            st.subheader(
+                "Resumen de la alternativa seleccionada"
+            )
+
+            col_rep1, col_rep2, col_rep3, col_rep4 = (
+                st.columns(4)
+            )
+
+            with col_rep1:
+
+                st.metric(
+                    "Estructurante requerido",
+                    f"{estructurante_cantidad:.2f} ton"
+                )
+
+            with col_rep2:
+
+                st.metric(
+                    "Estructurante / ton LD",
+                    f"{estructurante_por_ton:.2f} ton/t LD"
+                )
+
+            with col_rep3:
+
+                st.metric(
+                    "Humedad estimada",
+                    f"{humedad_reporte:.2f}%"
+                )
+
+            with col_rep4:
+
+                st.metric(
+                    "Relación C/N",
+                    f"{cn_reporte:.2f}"
+                )
+
+            st.write(
+                f"Estado técnico: *{estado_reporte}*"
+            )
             # ====================================================
             # FUNCIÓN PARA GENERAR PDF
             # ====================================================
