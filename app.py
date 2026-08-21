@@ -1869,38 +1869,41 @@ elif menu == "Capacidad de lodo":
                     "Primero aproxima el cartón a la referencia "
                     "histórica y después calcula el aserrín necesario."
                 )
-            # ====================================================
+# ====================================================
             # INDICADORES DE ESTRUCTURANTE POR TONELADA DE LODO
             # ====================================================
-            
+
             if lodo_obj > 0:
-            
+
                 # Alternativa A: solo aserrín
                 estructurante_por_ton_aserrin = (
                     aserrin_solo / lodo_obj
                 )
-            
+
                 # Alternativa B: solo cartón adicional
                 estructurante_por_ton_carton = (
                     carton_adicional / lodo_obj
                 )
-            
+
                 # Alternativa C: cartón + aserrín
                 estructurante_total_combinado = (
                     carton_combinado
                     + aserrin_combinado
                 )
-            
+
                 estructurante_por_ton_combinado = (
-                    estructurante_total_combinado / lodo_obj
+                    estructurante_total_combinado
+                    / lodo_obj
                 )
-            
+
             else:
-            
+
                 estructurante_por_ton_aserrin = 0
                 estructurante_por_ton_carton = 0
                 estructurante_total_combinado = 0
                 estructurante_por_ton_combinado = 0
+
+
             # ====================================================
             # COMPARACIÓN DE ESCENARIOS
             # ====================================================
@@ -1959,6 +1962,14 @@ elif menu == "Capacidad de lodo":
                     0
                 ],
 
+                "Estructurante adicional / ton LD": [
+                    0,
+                    estructurante_por_ton_aserrin,
+                    estructurante_por_ton_carton,
+                    estructurante_por_ton_combinado,
+                    0
+                ],
+
                 "Masa total (ton)": [
                     mezcla_base["masa"],
                     mezcla_solo_aserrin["masa"],
@@ -1989,103 +2000,143 @@ elif menu == "Capacidad de lodo":
                 use_container_width=True
             )
 
+
             # ====================================================
             # FUNCIÓN DE ESTADO
             # ====================================================
 
             def evaluar_estado(mezcla):
-            
+
                 humedad = mezcla["humedad"]
                 cn = mezcla["cn"]
-            
-                # --------------------------------------------
+
                 # Primero evaluamos C/N
-                # --------------------------------------------
-            
                 cumple_cn = (
                     cn >= cn_min
                     and cn <= cn_max
                 )
-            
+
                 if not cumple_cn:
                     return "REFORMULAR"
-            
-                # --------------------------------------------
+
                 # Luego evaluamos humedad
-                # --------------------------------------------
-            
+
                 if humedad < hum_min:
                     return "HUMEDAD BAJA"
-            
+
                 elif humedad <= hum_min + 2:
                     return "VIABLE CERCA DEL LÍMITE MÍNIMO"
-            
+
                 elif humedad > hum_max:
                     return "HUMEDAD ALTA"
-            
+
                 elif humedad >= hum_max - 2:
                     return "VIABLE CERCA DEL LÍMITE MÁXIMO"
-            
+
                 else:
                     return "VIABLE"
+
+
             # ====================================================
             # EVALUAR CADA ALTERNATIVA
             # ====================================================
-            
+
             estado_aserrin = evaluar_estado(
                 mezcla_solo_aserrin
             )
-            
+
             estado_carton = evaluar_estado(
                 mezcla_solo_carton
             )
-            
+
             estado_combinada = evaluar_estado(
                 mezcla_combinada
             )
-            
-            
+
+
             # ====================================================
             # LECTURA PARA LA TOMA DE DECISIÓN
             # ====================================================
-            
-            st.subheader("Lectura para la toma de decisión")
-            # ====================================================
-            # RECOMENDACIÓN DE ALTERNATIVA
-            # ====================================================
+
+            st.subheader(
+                "Lectura para la toma de decisión"
+            )
+
+            estados_viables = [
+                "VIABLE",
+                "VIABLE CERCA DEL LÍMITE MÍNIMO",
+                "VIABLE CERCA DEL LÍMITE MÁXIMO"
+            ]
+
+            # Priorizamos primero alternativas plenamente VIABLES
 
             if estado_combinada == "VIABLE":
 
                 st.success(
                     "🟢 La alternativa combinada de cartón + aserrín "
-                    "permite obtener una mezcla dentro de los rangos "
-                    "de humedad y relación C/N."
+                    "mantiene la humedad y la relación C/N dentro de "
+                    "los rangos establecidos con un margen operativo adecuado."
                 )
 
             elif estado_aserrin == "VIABLE":
 
                 st.success(
-                    "🟢 La alternativa con aserrín permite obtener "
-                    "una mezcla dentro de los rangos establecidos."
+                    "🟢 La alternativa con aserrín mantiene la humedad "
+                    "y la relación C/N dentro de los rangos establecidos "
+                    "con un margen operativo adecuado."
                 )
 
             elif estado_carton == "VIABLE":
 
                 st.success(
-                    "🟢 La alternativa con cartón adicional permite "
-                    "obtener una mezcla dentro de los rangos establecidos."
+                    "🟢 La alternativa con cartón adicional mantiene "
+                    "la humedad y la relación C/N dentro de los rangos "
+                    "establecidos con un margen operativo adecuado."
+                )
+
+            # Si ninguna está plenamente viable,
+            # mostramos las que cumplen pero están cerca de un límite.
+
+            elif estado_combinada in estados_viables:
+
+                st.warning(
+                    f"🟡 La alternativa combinada de cartón + aserrín "
+                    f"es técnicamente admisible, pero su estado es: "
+                    f"{estado_combinada}. "
+                    f"Se recomienda verificar la humedad real antes "
+                    f"de aplicar la formulación."
+                )
+
+            elif estado_aserrin in estados_viables:
+
+                st.warning(
+                    f"🟡 La alternativa con aserrín es técnicamente "
+                    f"admisible, pero su estado es: {estado_aserrin}. "
+                    f"Se recomienda verificar la humedad real antes "
+                    f"de aplicar la formulación."
+                )
+
+            elif estado_carton in estados_viables:
+
+                st.warning(
+                    f"🟡 La alternativa con cartón es técnicamente "
+                    f"admisible, pero su estado es: {estado_carton}. "
+                    f"Se recomienda verificar la humedad real antes "
+                    f"de aplicar la formulación."
                 )
 
             else:
 
                 st.warning(
-                    "⚠️ Ninguna de las alternativas simples alcanza "
-                    "simultáneamente los objetivos de humedad y relación C/N. "
-                    "Esto no representa necesariamente un error de cálculo. "
-                    "Indica que la composición inicial está alejada de "
-                    "la condición objetivo y debe redistribuirse entre "
-                    "lotes o reformularse antes de definir una compra."
+                    "⚠️ Ninguna de las alternativas evaluadas alcanza "
+                    "simultáneamente condiciones adecuadas de humedad "
+                    "y relación C/N. Esto no significa necesariamente "
+                    "que exista un error de cálculo; puede indicar que "
+                    "la composición inicial requiere redistribuir materiales "
+                    "entre lotes o evaluar otra combinación antes de "
+                    "definir el abastecimiento."
                 )
+
 
             # ====================================================
             # DETALLE DE CADA ALTERNATIVA
@@ -2097,10 +2148,25 @@ elif menu == "Capacidad de lodo":
 
             col_r1, col_r2, col_r3 = st.columns(3)
 
+
+            # ----------------------------------------------------
+            # SOLO ASERRÍN
+            # ----------------------------------------------------
+
             with col_r1:
 
                 st.write(
                     "*Solo aserrín*"
+                )
+
+                st.metric(
+                    "Estructurante adicional",
+                    f"{aserrin_solo:.2f} ton"
+                )
+
+                st.metric(
+                    "Estructurante por ton de lodo",
+                    f"{estructurante_por_ton_aserrin:.2f} ton/t LD"
                 )
 
                 st.metric(
@@ -2117,10 +2183,25 @@ elif menu == "Capacidad de lodo":
                     f"Estado: *{estado_aserrin}*"
                 )
 
+
+            # ----------------------------------------------------
+            # SOLO CARTÓN
+            # ----------------------------------------------------
+
             with col_r2:
 
                 st.write(
                     "*Solo cartón*"
+                )
+
+                st.metric(
+                    "Cartón adicional",
+                    f"{carton_adicional:.2f} ton"
+                )
+
+                st.metric(
+                    "Estructurante por ton de lodo",
+                    f"{estructurante_por_ton_carton:.2f} ton/t LD"
                 )
 
                 st.metric(
@@ -2137,10 +2218,25 @@ elif menu == "Capacidad de lodo":
                     f"Estado: *{estado_carton}*"
                 )
 
+
+            # ----------------------------------------------------
+            # CARTÓN + ASERRÍN
+            # ----------------------------------------------------
+
             with col_r3:
 
                 st.write(
                     "*Cartón + aserrín*"
+                )
+
+                st.metric(
+                    "Estructurante adicional total",
+                    f"{estructurante_total_combinado:.2f} ton"
+                )
+
+                st.metric(
+                    "Estructurante por ton de lodo",
+                    f"{estructurante_por_ton_combinado:.2f} ton/t LD"
                 )
 
                 st.metric(
@@ -2157,6 +2253,19 @@ elif menu == "Capacidad de lodo":
                     f"Estado: *{estado_combinada}*"
                 )
 
+
+            # ====================================================
+            # EXPLICACIÓN DEL INDICADOR
+            # ====================================================
+
+            st.info(
+                "💡 El indicador 'Estructurante por ton de lodo' "
+                "muestra cuántas toneladas de material estructurante "
+                "adicional se estiman por cada tonelada de lodo a procesar. "
+                "El resultado considera toda la composición ingresada "
+                "(RO, ROD, cartón y lodo), por lo que no representa "
+                "una relación exclusiva entre el estructurante y el lodo."
+            )
             # ====================================================
             # EXPLICACIÓN
             # ====================================================
