@@ -1412,13 +1412,13 @@ if modo_capacidad == "Calcular lodo máximo según materiales disponibles":
     # Este ELSE pertenece a: if masa_sin_lodo > 0
     # ========================================================
 
-    else:
+        else:
 
         st.info(
             "Ingrese al menos una cantidad de material "
             "disponible para realizar la simulación."
         )
-# ============================================================
+    # ============================================================
     # MODO 2
     # PLANIFICAR MATERIALES PARA UNA CANTIDAD DE LODO A PROCESAR
     # ============================================================
