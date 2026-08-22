@@ -2157,8 +2157,7 @@ if modo_capacidad == "Calcular lodo máximo según materiales disponibles":
             and humedad_recomendada < hum_min
         ):
 
-…
-[19:47, 21/8/2026] Mishel Ruiz: # ============================================================
+# ============================================================
 # MODO 2
 # PLANIFICAR MATERIALES PARA UNA CANTIDAD DE LODO A PROCESAR
 #
